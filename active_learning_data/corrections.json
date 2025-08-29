@@ -1,0 +1,829 @@
+[
+  {
+    "case_id": "CORR-c32bcd9a",
+    "timestamp": "2025-08-29T18:59:08.832446",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Feature violates Utah age verification requirements for users under 18",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "Utah",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 13,
+        "age_max": 17
+      },
+      "regulation_type": "Age Verification",
+      "feature_type": "Social Media"
+    },
+    "confidence_score": 0.85,
+    "model_used": "Legal-BERT",
+    "correction_type": "label_correction",
+    "impact_score": 0.8999999999999999
+  },
+  {
+    "case_id": "CORR-33c5d23c",
+    "timestamp": "2025-08-29T18:59:08.832749",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Missing GDPR consent mechanisms for data processing",
+    "feature_characteristics": {
+      "geographic": {
+        "region": "EU",
+        "country": "Germany"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 65
+      },
+      "regulation_type": "Data Protection",
+      "feature_type": "User Registration"
+    },
+    "confidence_score": 0.78,
+    "model_used": "Rules-Based",
+    "correction_type": "label_correction",
+    "impact_score": 0.8
+  },
+  {
+    "case_id": "CORR-bf96555d",
+    "timestamp": "2025-08-29T18:59:08.832943",
+    "original_prediction": "Non-Compliant",
+    "corrected_label": "Compliant",
+    "reviewer_reasoning": "Feature correctly implements California privacy requirements",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "California",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 100
+      },
+      "regulation_type": "Privacy",
+      "feature_type": "Data Collection"
+    },
+    "confidence_score": 0.92,
+    "model_used": "LLM+RAG",
+    "correction_type": "label_correction",
+    "impact_score": 0.8999999999999999
+  },
+  {
+    "case_id": "CORR-f1d6c289",
+    "timestamp": "2025-08-29T18:59:08.833279",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Safety protocols not implemented for hazardous material handling",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "Texas",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 21,
+        "age_max": 65
+      },
+      "regulation_type": "Safety",
+      "feature_type": "Industrial Process"
+    },
+    "confidence_score": 0.88,
+    "model_used": "Legal-BERT",
+    "correction_type": "label_correction",
+    "impact_score": 0.8999999999999999
+  },
+  {
+    "case_id": "CORR-6a2af96b",
+    "timestamp": "2025-08-29T18:59:08.833614",
+    "original_prediction": "Unclear",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Environmental impact assessment required but not conducted",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "Oregon",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 100
+      },
+      "regulation_type": "Environmental",
+      "feature_type": "Construction Project"
+    },
+    "confidence_score": 0.65,
+    "model_used": "Rules-Based",
+    "correction_type": "label_correction",
+    "impact_score": 0.8
+  },
+  {
+    "case_id": "CORR-aa248077",
+    "timestamp": "2025-08-29T19:01:17.789291",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Utah age verification requirements not met for users 13-17",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "Utah",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 13,
+        "age_max": 17
+      },
+      "regulation_type": "Age Verification",
+      "feature_type": "Social Media"
+    },
+    "confidence_score": 0.82,
+    "model_used": "Legal-BERT",
+    "correction_type": "label_correction",
+    "impact_score": 0.8999999999999999
+  },
+  {
+    "case_id": "CORR-301f70df",
+    "timestamp": "2025-08-29T19:01:17.789686",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Utah parental consent mechanisms missing for under-18 users",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "Utah",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 13,
+        "age_max": 17
+      },
+      "regulation_type": "Parental Consent",
+      "feature_type": "User Registration"
+    },
+    "confidence_score": 0.79,
+    "model_used": "Rules-Based",
+    "correction_type": "label_correction",
+    "impact_score": 0.8
+  },
+  {
+    "case_id": "CORR-61a7e121",
+    "timestamp": "2025-08-29T19:01:17.789985",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "GDPR data processing consent not properly implemented",
+    "feature_characteristics": {
+      "geographic": {
+        "region": "EU",
+        "country": "France"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 65
+      },
+      "regulation_type": "Data Protection",
+      "feature_type": "Data Collection"
+    },
+    "confidence_score": 0.76,
+    "model_used": "LLM+RAG",
+    "correction_type": "label_correction",
+    "impact_score": 0.8
+  },
+  {
+    "case_id": "CORR-a8d0395b",
+    "timestamp": "2025-08-29T19:01:17.790268",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "EU privacy policy not compliant with GDPR requirements",
+    "feature_characteristics": {
+      "geographic": {
+        "region": "EU",
+        "country": "Germany"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 100
+      },
+      "regulation_type": "Privacy Policy",
+      "feature_type": "Legal Documentation"
+    },
+    "confidence_score": 0.81,
+    "model_used": "Legal-BERT",
+    "correction_type": "label_correction",
+    "impact_score": 0.8999999999999999
+  },
+  {
+    "case_id": "CORR-56bfc2be",
+    "timestamp": "2025-08-29T19:01:17.790551",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "California privacy rights not properly implemented",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "California",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 100
+      },
+      "regulation_type": "Privacy Rights",
+      "feature_type": "User Controls"
+    },
+    "confidence_score": 0.77,
+    "model_used": "Rules-Based",
+    "correction_type": "label_correction",
+    "impact_score": 0.8
+  },
+  {
+    "case_id": "CORR-d64cfce0",
+    "timestamp": "2025-08-29T19:01:48.201902",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Utah age verification requirements not met for users 13-17",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "Utah",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 13,
+        "age_max": 17
+      },
+      "regulation_type": "Age Verification",
+      "feature_type": "Social Media"
+    },
+    "confidence_score": 0.82,
+    "model_used": "Legal-BERT",
+    "correction_type": "label_correction",
+    "impact_score": 0.8999999999999999
+  },
+  {
+    "case_id": "CORR-a31a43e0",
+    "timestamp": "2025-08-29T19:01:48.261304",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Utah parental consent mechanisms missing for under-18 users",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "Utah",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 13,
+        "age_max": 17
+      },
+      "regulation_type": "Parental Consent",
+      "feature_type": "User Registration"
+    },
+    "confidence_score": 0.79,
+    "model_used": "Rules-Based",
+    "correction_type": "label_correction",
+    "impact_score": 0.8
+  },
+  {
+    "case_id": "CORR-25716019",
+    "timestamp": "2025-08-29T19:01:48.270654",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "GDPR data processing consent not properly implemented",
+    "feature_characteristics": {
+      "geographic": {
+        "region": "EU",
+        "country": "France"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 65
+      },
+      "regulation_type": "Data Protection",
+      "feature_type": "Data Collection"
+    },
+    "confidence_score": 0.76,
+    "model_used": "LLM+RAG",
+    "correction_type": "label_correction",
+    "impact_score": 0.8
+  },
+  {
+    "case_id": "CORR-dc28c064",
+    "timestamp": "2025-08-29T19:01:48.282888",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "EU privacy policy not compliant with GDPR requirements",
+    "feature_characteristics": {
+      "geographic": {
+        "region": "EU",
+        "country": "Germany"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 100
+      },
+      "regulation_type": "Privacy Policy",
+      "feature_type": "Legal Documentation"
+    },
+    "confidence_score": 0.81,
+    "model_used": "Legal-BERT",
+    "correction_type": "label_correction",
+    "impact_score": 0.8999999999999999
+  },
+  {
+    "case_id": "CORR-32eb18bb",
+    "timestamp": "2025-08-29T19:01:48.300951",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "California privacy rights not properly implemented",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "California",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 100
+      },
+      "regulation_type": "Privacy Rights",
+      "feature_type": "User Controls"
+    },
+    "confidence_score": 0.77,
+    "model_used": "Rules-Based",
+    "correction_type": "label_correction",
+    "impact_score": 0.8
+  },
+  {
+    "case_id": "CORR-d9a2d6e7",
+    "timestamp": "2025-08-29T19:02:10.245753",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Utah age verification requirements not met for users 13-17",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "Utah",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 13,
+        "age_max": 17
+      },
+      "regulation_type": "Age Verification",
+      "feature_type": "Social Media"
+    },
+    "confidence_score": 0.82,
+    "model_used": "Legal-BERT",
+    "correction_type": "label_correction",
+    "impact_score": 0.8999999999999999
+  },
+  {
+    "case_id": "CORR-40b3ca68",
+    "timestamp": "2025-08-29T19:02:10.302240",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Utah parental consent mechanisms missing for under-18 users",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "Utah",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 13,
+        "age_max": 17
+      },
+      "regulation_type": "Parental Consent",
+      "feature_type": "User Registration"
+    },
+    "confidence_score": 0.79,
+    "model_used": "Rules-Based",
+    "correction_type": "label_correction",
+    "impact_score": 0.8
+  },
+  {
+    "case_id": "CORR-02e97f31",
+    "timestamp": "2025-08-29T19:02:10.309557",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "GDPR data processing consent not properly implemented",
+    "feature_characteristics": {
+      "geographic": {
+        "region": "EU",
+        "country": "France"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 65
+      },
+      "regulation_type": "Data Protection",
+      "feature_type": "Data Collection"
+    },
+    "confidence_score": 0.76,
+    "model_used": "LLM+RAG",
+    "correction_type": "label_correction",
+    "impact_score": 0.8
+  },
+  {
+    "case_id": "CORR-87fb7018",
+    "timestamp": "2025-08-29T19:02:10.319176",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "EU privacy policy not compliant with GDPR requirements",
+    "feature_characteristics": {
+      "geographic": {
+        "region": "EU",
+        "country": "Germany"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 100
+      },
+      "regulation_type": "Privacy Policy",
+      "feature_type": "Legal Documentation"
+    },
+    "confidence_score": 0.81,
+    "model_used": "Legal-BERT",
+    "correction_type": "label_correction",
+    "impact_score": 0.8999999999999999
+  },
+  {
+    "case_id": "CORR-87eb2f4e",
+    "timestamp": "2025-08-29T19:02:10.326790",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "California privacy rights not properly implemented",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "California",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 100
+      },
+      "regulation_type": "Privacy Rights",
+      "feature_type": "User Controls"
+    },
+    "confidence_score": 0.77,
+    "model_used": "Rules-Based",
+    "correction_type": "label_correction",
+    "impact_score": 0.8
+  },
+  {
+    "case_id": "CORR-cc0f2720",
+    "timestamp": "2025-08-29T19:02:17.339882",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Feature violates Utah age verification requirements for users under 18",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "Utah",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 13,
+        "age_max": 17
+      },
+      "regulation_type": "Age Verification",
+      "feature_type": "Social Media"
+    },
+    "confidence_score": 0.85,
+    "model_used": "Legal-BERT",
+    "correction_type": "label_correction",
+    "impact_score": 0.8999999999999999
+  },
+  {
+    "case_id": "CORR-f209f86e",
+    "timestamp": "2025-08-29T19:02:17.387087",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Missing GDPR consent mechanisms for data processing",
+    "feature_characteristics": {
+      "geographic": {
+        "region": "EU",
+        "country": "Germany"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 65
+      },
+      "regulation_type": "Data Protection",
+      "feature_type": "User Registration"
+    },
+    "confidence_score": 0.78,
+    "model_used": "Rules-Based",
+    "correction_type": "label_correction",
+    "impact_score": 0.8
+  },
+  {
+    "case_id": "CORR-b2e3f37e",
+    "timestamp": "2025-08-29T19:02:17.398140",
+    "original_prediction": "Non-Compliant",
+    "corrected_label": "Compliant",
+    "reviewer_reasoning": "Feature correctly implements California privacy requirements",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "California",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 100
+      },
+      "regulation_type": "Privacy",
+      "feature_type": "Data Collection"
+    },
+    "confidence_score": 0.92,
+    "model_used": "LLM+RAG",
+    "correction_type": "label_correction",
+    "impact_score": 0.8999999999999999
+  },
+  {
+    "case_id": "CORR-f4f26c90",
+    "timestamp": "2025-08-29T19:02:17.409014",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Safety protocols not implemented for hazardous material handling",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "Texas",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 21,
+        "age_max": 65
+      },
+      "regulation_type": "Safety",
+      "feature_type": "Industrial Process"
+    },
+    "confidence_score": 0.88,
+    "model_used": "Legal-BERT",
+    "correction_type": "label_correction",
+    "impact_score": 0.8999999999999999
+  },
+  {
+    "case_id": "CORR-b7fecfa7",
+    "timestamp": "2025-08-29T19:02:17.414559",
+    "original_prediction": "Unclear",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Environmental impact assessment required but not conducted",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "Oregon",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 100
+      },
+      "regulation_type": "Environmental",
+      "feature_type": "Construction Project"
+    },
+    "confidence_score": 0.65,
+    "model_used": "Rules-Based",
+    "correction_type": "label_correction",
+    "impact_score": 0.8
+  },
+  {
+    "case_id": "CORR-822f803e",
+    "timestamp": "2025-08-29T19:03:23.569178",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Utah age verification requirements not met for users under 18",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "Utah",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 13,
+        "age_max": 17
+      },
+      "regulation_type": "Age Verification"
+    },
+    "confidence_score": 0.85,
+    "model_used": "Legal-BERT",
+    "correction_type": "label_correction",
+    "impact_score": 0.8999999999999999
+  },
+  {
+    "case_id": "CORR-69ae5b91",
+    "timestamp": "2025-08-29T19:08:51.410674",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Feature violates Utah age verification requirements for users under 18",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "Utah",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 13,
+        "age_max": 17
+      },
+      "regulation_type": "Age Verification",
+      "feature_type": "Social Media"
+    },
+    "confidence_score": 0.85,
+    "model_used": "Legal-BERT",
+    "correction_type": "label_correction",
+    "impact_score": 0.8999999999999999
+  },
+  {
+    "case_id": "CORR-b647962e",
+    "timestamp": "2025-08-29T19:08:51.457588",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Missing GDPR consent mechanisms for data processing",
+    "feature_characteristics": {
+      "geographic": {
+        "region": "EU",
+        "country": "Germany"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 65
+      },
+      "regulation_type": "Data Protection",
+      "feature_type": "User Registration"
+    },
+    "confidence_score": 0.78,
+    "model_used": "Rules-Based",
+    "correction_type": "label_correction",
+    "impact_score": 0.8
+  },
+  {
+    "case_id": "CORR-039a4ce6",
+    "timestamp": "2025-08-29T19:08:51.474619",
+    "original_prediction": "Non-Compliant",
+    "corrected_label": "Compliant",
+    "reviewer_reasoning": "Feature correctly implements California privacy requirements",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "California",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 100
+      },
+      "regulation_type": "Privacy",
+      "feature_type": "Data Collection"
+    },
+    "confidence_score": 0.92,
+    "model_used": "LLM+RAG",
+    "correction_type": "label_correction",
+    "impact_score": 0.8999999999999999
+  },
+  {
+    "case_id": "CORR-2f08b379",
+    "timestamp": "2025-08-29T19:08:51.481150",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Safety protocols not implemented for hazardous material handling",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "Texas",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 21,
+        "age_max": 65
+      },
+      "regulation_type": "Safety",
+      "feature_type": "Industrial Process"
+    },
+    "confidence_score": 0.88,
+    "model_used": "Legal-BERT",
+    "correction_type": "label_correction",
+    "impact_score": 0.8999999999999999
+  },
+  {
+    "case_id": "CORR-508b04e1",
+    "timestamp": "2025-08-29T19:08:51.489956",
+    "original_prediction": "Unclear",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Environmental impact assessment required but not conducted",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "Oregon",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 100
+      },
+      "regulation_type": "Environmental",
+      "feature_type": "Construction Project"
+    },
+    "confidence_score": 0.65,
+    "model_used": "Rules-Based",
+    "correction_type": "label_correction",
+    "impact_score": 0.8
+  },
+  {
+    "case_id": "CORR-23bf4b3f",
+    "timestamp": "2025-08-29T19:08:58.639519",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Utah age verification requirements not met for users 13-17",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "Utah",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 13,
+        "age_max": 17
+      },
+      "regulation_type": "Age Verification",
+      "feature_type": "Social Media"
+    },
+    "confidence_score": 0.82,
+    "model_used": "Legal-BERT",
+    "correction_type": "label_correction",
+    "impact_score": 0.8999999999999999
+  },
+  {
+    "case_id": "CORR-b706a02f",
+    "timestamp": "2025-08-29T19:08:58.675295",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Utah parental consent mechanisms missing for under-18 users",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "Utah",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 13,
+        "age_max": 17
+      },
+      "regulation_type": "Parental Consent",
+      "feature_type": "User Registration"
+    },
+    "confidence_score": 0.79,
+    "model_used": "Rules-Based",
+    "correction_type": "label_correction",
+    "impact_score": 0.8
+  },
+  {
+    "case_id": "CORR-ade29e8f",
+    "timestamp": "2025-08-29T19:08:58.692377",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "GDPR data processing consent not properly implemented",
+    "feature_characteristics": {
+      "geographic": {
+        "region": "EU",
+        "country": "France"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 65
+      },
+      "regulation_type": "Data Protection",
+      "feature_type": "Data Collection"
+    },
+    "confidence_score": 0.76,
+    "model_used": "LLM+RAG",
+    "correction_type": "label_correction",
+    "impact_score": 0.8
+  },
+  {
+    "case_id": "CORR-f9b9cfa5",
+    "timestamp": "2025-08-29T19:08:58.708288",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "EU privacy policy not compliant with GDPR requirements",
+    "feature_characteristics": {
+      "geographic": {
+        "region": "EU",
+        "country": "Germany"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 100
+      },
+      "regulation_type": "Privacy Policy",
+      "feature_type": "Legal Documentation"
+    },
+    "confidence_score": 0.81,
+    "model_used": "Legal-BERT",
+    "correction_type": "label_correction",
+    "impact_score": 0.8999999999999999
+  },
+  {
+    "case_id": "CORR-0bcf930d",
+    "timestamp": "2025-08-29T19:08:58.714105",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "California privacy rights not properly implemented",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "California",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 18,
+        "age_max": 100
+      },
+      "regulation_type": "Privacy Rights",
+      "feature_type": "User Controls"
+    },
+    "confidence_score": 0.77,
+    "model_used": "Rules-Based",
+    "correction_type": "label_correction",
+    "impact_score": 0.8
+  }
+]
