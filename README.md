@@ -1,10 +1,10 @@
-# 🌍 Social Media Compliance Framework
+# 🌍 Geo-Compliance Classifier
 
-A comprehensive, multi-jurisdictional compliance system for social media platforms to meet regulatory obligations across the EU, United States, and other global jurisdictions.
+A comprehensive AI-powered system for analyzing and classifying social media features against global regulatory requirements. This repository provides automated compliance analysis, risk assessment, and regulatory mapping for social media platforms operating across multiple jurisdictions.
 
 ## 🎯 Overview
 
-This repository provides production-ready compliance implementations for:
+The Geo-Compliance Classifier automatically evaluates social media features against regulatory frameworks including:
 
 - **🇪🇺 EU Digital Services Act (DSA)** - Content moderation, transparency, algorithmic controls
 - **🇪🇺 EU General Data Protection Regulation (GDPR)** - Privacy rights, data protection
@@ -15,39 +15,511 @@ This repository provides production-ready compliance implementations for:
 
 ## 🏗️ Repository Structure
 
-### 📚 **Documentation** (`/docs/`)
-Comprehensive implementation guides and regulatory analysis
-- **Regulatory Frameworks** - Detailed compliance guides for each jurisdiction
-- **Implementation Guides** - Step-by-step technical implementation
-- **Checklists** - Designer, PM, and legal review checklists
-- **Risk Assessments** - Feature risk matrices and enforcement analysis
+```
+geo-compliance-classifier/
+├── � artifact_preprocessor/     # Document processing and codename expansion
+├── 🤖 src/                      # Core compliance analysis engine
+├── 🎯 retriever/                # RAG-based regulation retrieval system
+├── 📊 demos/                    # Example usage and demonstrations
+├── ⚙️ config/                   # Configuration files and jurisdiction rules
+├── 📚 docs/                     # Comprehensive documentation and guides
+├── 🧪 tests/                    # Testing framework and validation
+├── 📈 monitoring/               # Compliance tracking and reporting
+├── 🗂️ data/                     # Sample data and training sets
+├── 🔧 utils/                    # Utility functions and helpers
+└── 📋 templates/                # Feature and compliance templates
+```
 
-### ⚙️ **Configuration** (`/config/`)
-Jurisdiction-specific compliance rules and requirements
-- **Jurisdictions** - YAML configs for each regulatory framework
-- **Age Thresholds** - Configurable limits for different jurisdictions
-- **Notification Curfews** - Time-based restrictions per region
-- **Retention Periods** - Data lifecycle management by regulation
+## 🚀 Quick Start
 
-### 💻 **Source Code** (`/src/`)
-Modular compliance components ready for integration
-- **Age Verification** - Document processing, biometric analysis, fraud detection
-- **Parental Controls** - Account oversight, time limits, activity monitoring
-- **Content Moderation** - CSAM detection, illegal content, transparency reporting
-- **Algorithmic Controls** - Feed transparency, user controls, non-profiling options
-- **Data Portability** - GDPR Article 20, DMA compliance tools
-- **Audit Logging** - Evidence collection, retention management
+### 1. Installation
 
-### 🧪 **Testing Framework** (`/tests/`)
-Comprehensive compliance validation and testing
-- **Integration Tests** - End-to-end compliance validation
-- **Acceptance Tests** - Regulatory requirement verification
-- **Performance Tests** - System scalability under compliance load
-- **Security Tests** - Penetration testing for compliance systems
+```bash
+# Clone the repository
+git clone https://github.com/your-org/geo-compliance-classifier.git
+cd geo-compliance-classifier
 
-### 🚀 **Deployment** (`/deployment/`)
-Production-ready infrastructure and deployment configs
-- **Docker Containers** - Portable compliance service deployment
+# Install dependencies
+pip install -r requirements.txt
+
+# Optional: Install development dependencies
+pip install -r requirements_dev.txt
+```
+
+### 2. Basic Usage
+
+#### Process Feature Documents with Artifact Preprocessor
+
+```bash
+# Process feature documentation with codename expansion
+python -m artifact_preprocessor \
+  --features feature_sample_data.csv \
+  --terms terminology.csv \
+  --out ./output
+
+# Process documents from a directory
+python -m artifact_preprocessor \
+  --docs ./legal_texts \
+  --terms terminology.csv \
+  --out ./processed_docs
+```
+
+#### Run Compliance Analysis
+
+```bash
+# Analyze features for compliance
+python tiktok_feature_generator.py
+
+# Run specific demos
+python demos/demo_active_learning.py
+python demos/demo_confidence_validator.py
+python demos/demo_evidence_verifier.py
+```
+
+#### Start MCP Service (Model Context Protocol)
+
+```bash
+# Start the MCP service for integration
+python start_mcp_service.py
+
+# Test MCP connectivity
+python test_mcp.py
+```
+
+### 3. Configuration
+
+#### Set up jurisdiction-specific rules
+```bash
+# Copy sample configuration
+cp config/centralized_rag_config.yaml config/my_platform_config.yaml
+
+# Edit for your platform
+nano config/my_platform_config.yaml
+```
+
+#### Configure terminology expansion
+```bash
+# Add platform-specific terms to terminology.csv
+echo "YourTerm,Your Term Definition" >> terminology.csv
+```
+
+## 📚 Core Components
+
+### 🔧 Artifact Preprocessor
+
+The artifact preprocessor handles document processing, field extraction, and codename expansion.
+
+**Key Features:**
+- Document parsing (PDF, DOCX, MD, HTML, TXT, CSV)
+- Automated field extraction
+- Codename expansion using terminology mapping
+- Structured output in JSON/CSV formats
+
+**Usage:**
+```bash
+# Basic processing
+python -m artifact_preprocessor --features data.csv --terms terms.csv --out ./results
+
+# With verbose logging
+python -m artifact_preprocessor --features data.csv --terms terms.csv --out ./results --verbose
+
+# Help and options
+python -m artifact_preprocessor --help
+```
+
+**Input Format:**
+- **Features CSV:** Columns: `feature_name`, `feature_description`
+- **Terminology CSV:** Columns: `term`, `explanation`
+
+**Output Structure:**
+```json
+{
+  "feature_id": "csv_feature_0001",
+  "doc_id": "features_csv",
+  "feature_title": "Feature Name",
+  "feature_description": "Detailed description...",
+  "geo_country": "USA",
+  "geo_state": "California",
+  "domain": "recommendations",
+  "label": "compliant",
+  "implicated_regulations": ["US-CA-SB976"],
+  "data_practices": ["engagement_patterns", "user_preferences"],
+  "rationale": "Feature meets requirements because...",
+  "risk_tags": ["minor_targeting"],
+  "confidence_score": 0.87,
+  "codename_hits_json": [...]
+}
+```
+
+### 🎯 Compliance Engine
+
+The core compliance analysis system that evaluates features against regulatory requirements.
+
+**Key Features:**
+- Multi-jurisdictional compliance checking
+- Risk assessment and scoring
+- Automated evidence collection
+- Confidence scoring for decisions
+
+**Configuration:**
+```yaml
+# config/centralized_rag_config.yaml
+jurisdictions:
+  - name: "EU"
+    regulations: ["DSA", "GDPR"]
+  - name: "US-CA"
+    regulations: ["SB976", "COPPA"]
+
+risk_thresholds:
+  high: 0.8
+  medium: 0.5
+  low: 0.2
+```
+
+### � Retrieval-Augmented Generation (RAG)
+
+Advanced regulation retrieval system for context-aware compliance analysis.
+
+**Features:**
+- Semantic search across legal texts
+- Contextual regulation matching
+- Evidence-based compliance reasoning
+
+### 🎮 Interactive Demos
+
+#### Active Learning Demo
+```bash
+python demos/demo_active_learning.py
+```
+Demonstrates the system learning from compliance decisions and improving accuracy over time.
+
+#### Confidence Validator Demo
+```bash
+python demos/demo_confidence_validator.py
+```
+Shows how the system assesses confidence in its compliance decisions.
+
+#### Evidence Verifier Demo
+```bash
+python demos/demo_evidence_verifier.py
+```
+Illustrates evidence collection and verification for regulatory compliance.
+
+## 📊 Data Formats
+
+### Input Data
+
+#### Feature Sample Data (CSV)
+```csv
+feature_name,feature_description
+"Infinite Scroll for Shorts","Continuous video feed with infinite scrolling..."
+"Age-Gated Content","Restricted content requiring age verification..."
+```
+
+#### Terminology (CSV)
+```csv
+term,explanation
+ASL,"Age Segmentation Logic - System for identifying user age groups"
+GH,"Geo-Hash - Geographic targeting system"
+CDS,"Compliance Detection System - Automated policy violation detection"
+```
+
+### Output Data
+
+#### Processed Features (JSON)
+```json
+{
+  "feature_id": "GEN-0001",
+  "title": "Feature Name",
+  "description": "Feature description...",
+  "domain": "safety",
+  "geo_country": "USA",
+  "geo_state": "Florida",
+  "label": "compliant",
+  "implicated_regs": ["US-FL-HB3"],
+  "risk_tags": ["minor_targeting"],
+  "confidence_score": 0.92
+}
+```
+
+#### Compliance Reports (CSV)
+```csv
+feature_id,domain,compliance_status,risk_level,primary_regulation,confidence
+GEN-0001,safety,compliant,low,US-FL-HB3,0.92
+GEN-0002,recommendations,non-compliant,high,EU-DSA,0.87
+```
+
+## 🔧 Advanced Usage
+
+### Custom Regulation Integration
+
+1. **Add Regulation Text:**
+```bash
+# Add legal text to legal_texts/
+cp your_regulation.txt legal_texts/
+
+# Update configuration
+nano config/jurisdictions/your_jurisdiction.yaml
+```
+
+2. **Train Custom Models:**
+```bash
+# Generate training data
+python training_data_generator/generate_samples.py
+
+# Fine-tune classification
+python src/train_classifier.py --jurisdiction your_jurisdiction
+```
+
+### Batch Processing
+
+```bash
+# Process multiple feature sets
+for file in features_*.csv; do
+  python -m artifact_preprocessor --features "$file" --terms terminology.csv --out "./batch_output/${file%.*}"
+done
+
+# Aggregate results
+python utils/aggregate_results.py --input ./batch_output --output ./final_report.csv
+```
+
+### Integration with CI/CD
+
+```yaml
+# .github/workflows/compliance-check.yml
+name: Compliance Check
+on: [push, pull_request]
+jobs:
+  compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Compliance Analysis
+        run: |
+          pip install -r requirements.txt
+          python -m artifact_preprocessor --features features.csv --terms terminology.csv --out ./compliance_check
+          python utils/validate_compliance.py --input ./compliance_check
+```
+
+## 📈 Monitoring and Reporting
+
+### Generate Compliance Reports
+
+```bash
+# Generate comprehensive compliance report
+python monitoring/generate_report.py --input ./processed_features --output ./compliance_report.html
+
+# Export metrics for dashboards
+python monitoring/export_metrics.py --format prometheus --output ./metrics.txt
+```
+
+### Dashboard Setup
+
+The repository includes a compliance dashboard for visual monitoring:
+
+```bash
+cd "Compliance Dashboard"
+npm install
+npm run dev
+```
+
+Access at `http://localhost:3000` for real-time compliance monitoring.
+
+## 🧪 Testing
+
+### Run Test Suite
+
+```bash
+# Run all tests
+pytest tests/ -v
+
+# Run specific test categories
+pytest tests/unit/ -v                    # Unit tests
+pytest tests/integration/ -v             # Integration tests
+pytest tests/acceptance/ -v              # Compliance acceptance tests
+
+# Test specific jurisdictions
+pytest tests/ -k "florida" -v
+pytest tests/ -k "california" -v
+pytest tests/ -k "eu_dsa" -v
+```
+
+### Validation Scripts
+
+```bash
+# Validate configuration files
+python utils/validate_config.py
+
+# Check terminology consistency
+python utils/check_terminology.py
+
+# Verify regulation mappings
+python utils/verify_regulations.py
+```
+
+## 📋 Common Workflows
+
+### 1. New Feature Compliance Check
+
+```bash
+# 1. Add feature to CSV
+echo "New Feature,Feature description..." >> new_features.csv
+
+# 2. Process with preprocessor
+python -m artifact_preprocessor --features new_features.csv --terms terminology.csv --out ./new_analysis
+
+# 3. Review results
+cat ./new_analysis/preprocessed.jsonl | jq '.label'
+
+# 4. Generate compliance report
+python monitoring/feature_report.py --feature-id csv_feature_0001
+```
+
+### 2. Jurisdiction-Specific Analysis
+
+```bash
+# Analyze for specific jurisdiction
+python src/jurisdiction_analyzer.py --jurisdiction EU --features ./processed_features/
+
+# Generate jurisdiction compliance summary
+python utils/jurisdiction_summary.py --jurisdiction "US-CA" --output ca_compliance.md
+```
+
+### 3. Risk Assessment Workflow
+
+```bash
+# Run risk assessment
+python src/risk_assessor.py --input ./processed_features/ --output ./risk_analysis/
+
+# Generate risk matrix
+python utils/risk_matrix.py --input ./risk_analysis/ --format html
+
+# Export high-risk features
+python utils/filter_features.py --risk-level high --output high_risk_features.csv
+```
+
+## 🔗 API Integration
+
+### REST API Usage
+
+```bash
+# Start API server
+python src/api/compliance_server.py
+
+# Analyze feature via API
+curl -X POST http://localhost:8000/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"feature_title": "New Feature", "description": "...", "geo_country": "USA"}'
+
+# Get compliance status
+curl http://localhost:8000/compliance/feature_id_123
+```
+
+### Python SDK
+
+```python
+from src.sdk import ComplianceAnalyzer
+
+# Initialize analyzer
+analyzer = ComplianceAnalyzer(config_path="config/my_config.yaml")
+
+# Analyze feature
+result = analyzer.analyze_feature(
+    title="Age-Gated Content",
+    description="Restricted content requiring verification",
+    geo_country="USA",
+    geo_state="Florida"
+)
+
+print(f"Compliance: {result.label}")
+print(f"Risk Tags: {result.risk_tags}")
+print(f"Confidence: {result.confidence_score}")
+```
+
+## 🛠️ Troubleshooting
+
+### Common Issues
+
+**1. Import Errors**
+```bash
+# Ensure all dependencies are installed
+pip install -r requirements.txt
+
+# Check Python path
+export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+```
+
+**2. Processing Failures**
+```bash
+# Enable verbose logging
+python -m artifact_preprocessor --features data.csv --terms terminology.csv --verbose
+
+# Check file formats
+python utils/validate_input.py --features data.csv --terms terminology.csv
+```
+
+**3. Configuration Issues**
+```bash
+# Validate configuration
+python utils/validate_config.py --config config/my_config.yaml
+
+# Reset to defaults
+cp config/centralized_rag_config.yaml config/my_config.yaml
+```
+
+### Debug Mode
+
+```bash
+# Run with debug logging
+export LOG_LEVEL=DEBUG
+python -m artifact_preprocessor --features data.csv --terms terminology.csv --out ./debug_output
+
+# Check processing logs
+tail -f logs/artifact_preprocessor.log
+```
+
+## � Documentation
+
+- **📖 [User Guide](docs/README.md)** - Comprehensive usage documentation
+- **🏛️ [Regulatory Frameworks](docs/regulatory-frameworks/)** - Detailed regulation analysis
+- **✅ [Checklists](docs/checklists/)** - Compliance verification checklists
+- **🔧 [API Documentation](docs/api/)** - Technical API reference
+- **💡 [Examples](examples/)** - Sample implementations and use cases
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Setup
+
+```bash
+# Clone with submodules
+git clone --recursive https://github.com/your-org/geo-compliance-classifier.git
+
+# Install development dependencies
+pip install -r requirements_dev.txt
+
+# Install pre-commit hooks
+pre-commit install
+
+# Run development tests
+pytest tests/dev/ -v
+```
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+- **📧 Email:** compliance-support@yourorg.com
+- **💬 Discord:** [Join our community](https://discord.gg/compliance)
+- **📋 Issues:** [GitHub Issues](https://github.com/your-org/geo-compliance-classifier/issues)
+- **📖 Wiki:** [Project Wiki](https://github.com/your-org/geo-compliance-classifier/wiki)
+
+---
+
+**⚠️ Disclaimer:** This tool provides automated compliance analysis but does not constitute legal advice. Always consult with qualified legal professionals for regulatory compliance decisions.
 - **Kubernetes Manifests** - Scalable compliance infrastructure
 - **Terraform Templates** - Cloud infrastructure as code
 
