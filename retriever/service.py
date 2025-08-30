@@ -13,6 +13,7 @@ try:
     from fastapi import FastAPI, HTTPException, Query
     from fastapi.middleware.cors import CORSMiddleware
     from pydantic import BaseModel, Field
+    from contextlib import asynccontextmanager
 except ImportError:
     FastAPI = HTTPException = Query = CORSMiddleware = BaseModel = Field = None
 
@@ -258,10 +259,25 @@ class RetrievalService:
 
 # FastAPI app setup
 if FastAPI is not None:
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        """Lifespan context manager for FastAPI app."""
+        global service
+        try:
+            service = RetrievalService()
+            logger.info("Retrieval service started successfully")
+            yield
+        except Exception as e:
+            logger.error(f"Failed to start service: {e}")
+            raise
+        finally:
+            logger.info("Retrieval service shutting down")
+    
     app = FastAPI(
         title="Regulation Retriever API",
         description="High-performance legal document retrieval service",
-        version="1.0.0"
+        version="1.0.0",
+        lifespan=lifespan
     )
     
     app.add_middleware(
@@ -285,16 +301,7 @@ if FastAPI is not None:
         include_citation: bool = Field(True, description="Include citation metadata")
     
     
-    @app.on_event("startup")
-    async def startup_event():
-        """Initialize service on startup."""
-        global service
-        try:
-            service = RetrievalService()
-            logger.info("Retrieval service started successfully")
-        except Exception as e:
-            logger.error(f"Failed to start service: {e}")
-            raise
+
     
     
     @app.get("/health")

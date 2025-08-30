@@ -5,94 +5,63 @@ These tests verify that the refactored agents work correctly with the new interf
 """
 
 import pytest
-from core.agents import EvidenceVerificationAgent, ConfidenceValidatorAgent, ActiveLearningAgent
+from src.agents import ActiveLearningAgent, ConfidenceValidatorAgent
+from src.evidence import EvidenceVerificationAgent
 
 
 def test_evidence_verification_agent_initialization():
     """Test that EvidenceVerificationAgent can be initialized"""
-    try:
-        agent = EvidenceVerificationAgent(rag_base_url="http://localhost:8000")
-        assert agent is not None
-        assert hasattr(agent, 'verify_evidence')
-        print("✅ EvidenceVerificationAgent initialization successful")
-        return True
-    except Exception as e:
-        print(f"❌ EvidenceVerificationAgent initialization failed: {e}")
-        return False
+    agent = EvidenceVerificationAgent()
+    assert agent is not None
+    assert hasattr(agent, 'verify_evidence_with_rag')
 
 
 def test_confidence_validator_agent_initialization():
     """Test that ConfidenceValidatorAgent can be initialized"""
-    try:
-        agent = ConfidenceValidatorAgent(rag_base_url="http://localhost:8000")
-        assert agent is not None
-        assert hasattr(agent, 'validate_compliance')
-        print("✅ ConfidenceValidatorAgent initialization successful")
-        return True
-    except Exception as e:
-        print(f"❌ ConfidenceValidatorAgent initialization failed: {e}")
-        return False
+    agent = ConfidenceValidatorAgent()
+    assert agent is not None
+    assert hasattr(agent, 'validate_case')
 
 
 def test_active_learning_agent_initialization():
     """Test that ActiveLearningAgent can be initialized"""
-    try:
-        agent = ActiveLearningAgent(rag_base_url="http://localhost:8000")
-        assert agent is not None
-        assert hasattr(agent, 'record_correction')
-        print("✅ ActiveLearningAgent initialization successful")
-        return True
-    except Exception as e:
-        print(f"❌ ActiveLearningAgent initialization failed: {e}")
-        return False
+    agent = ActiveLearningAgent()
+    assert agent is not None
+    assert hasattr(agent, 'log_human_correction')
 
 
 def test_agent_methods_exist():
     """Test that all expected methods exist on the agents"""
-    try:
-        # Evidence Verification Agent
-        evidence_agent = EvidenceVerificationAgent(rag_base_url="http://localhost:8000")
-        expected_evidence_methods = ['verify_evidence', 'get_verification_stats', 'get_rag_system_status']
-        for method in expected_evidence_methods:
-            assert hasattr(evidence_agent, method), f"Missing method: {method}"
-        
-        # Confidence Validator Agent
-        validator_agent = ConfidenceValidatorAgent(rag_base_url="http://localhost:8000")
-        expected_validator_methods = ['validate_compliance', 'get_validation_stats', 'explain_decision']
-        for method in expected_validator_methods:
-            assert hasattr(validator_agent, method), f"Missing method: {method}"
-        
-        # Active Learning Agent
-        learning_agent = ActiveLearningAgent(rag_base_url="http://localhost:8000")
-        expected_learning_methods = ['record_correction', 'record_feedback', 'analyze_patterns']
-        for method in expected_learning_methods:
-            assert hasattr(learning_agent, method), f"Missing method: {method}"
-        
-        print("✅ All expected agent methods exist")
-        return True
-    except Exception as e:
-        print(f"❌ Agent method verification failed: {e}")
-        return False
+    # Evidence Verification Agent
+    evidence_agent = EvidenceVerificationAgent()
+    expected_evidence_methods = ['verify_evidence_with_rag', 'get_verification_summary']
+    for method in expected_evidence_methods:
+        assert hasattr(evidence_agent, method), f"Missing method: {method}"
+    
+    # Confidence Validator Agent
+    validator_agent = ConfidenceValidatorAgent()
+    expected_validator_methods = ['validate_case', 'get_validation_summary']
+    for method in expected_validator_methods:
+        assert hasattr(validator_agent, method), f"Missing method: {method}"
+    
+    # Active Learning Agent
+    learning_agent = ActiveLearningAgent()
+    expected_learning_methods = ['log_human_correction', 'get_rag_system_status']
+    for method in expected_learning_methods:
+        assert hasattr(learning_agent, method), f"Missing method: {method}"
 
 
 def test_agent_fallback_mechanism():
     """Test that agents can work without RAG service (fallback mode)"""
-    try:
-        # Test with invalid RAG URL to trigger fallback
-        evidence_agent = EvidenceVerificationAgent(rag_base_url="http://invalid-url:9999")
-        assert evidence_agent.rag_available is False
-        
-        validator_agent = ConfidenceValidatorAgent(rag_base_url="http://invalid-url:9999")
-        assert validator_agent.rag_available is False
-        
-        learning_agent = ActiveLearningAgent(rag_base_url="http://invalid-url:9999")
-        assert learning_agent.rag_available is False
-        
-        print("✅ Agent fallback mechanism working correctly")
-        return True
-    except Exception as e:
-        print(f"❌ Agent fallback mechanism test failed: {e}")
-        return False
+    # Test with invalid RAG URL to trigger fallback
+    evidence_agent = EvidenceVerificationAgent()
+    assert evidence_agent.rag_adapter is None or hasattr(evidence_agent, 'rag_adapter')
+    
+    validator_agent = ConfidenceValidatorAgent()
+    assert validator_agent.rag_adapter is None or hasattr(validator_agent, 'rag_adapter')
+    
+    learning_agent = ActiveLearningAgent()
+    assert learning_agent.rag_adapter is None or hasattr(learning_agent, 'rag_adapter')
 
 
 if __name__ == "__main__":

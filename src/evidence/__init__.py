@@ -6,6 +6,7 @@ Centralized evidence logging, export, and monitoring for compliance decisions.
 
 from .evidence_logger import EvidenceLogger, get_evidence_logger, log_compliance_decision
 from .evidence_exporter import EvidenceExporter
+from .evidence_verifier import EvidenceVerificationAgent
 
 # Advanced features (optional dependencies)
 try:
@@ -20,6 +21,7 @@ __all__ = [
     'get_evidence_logger', 
     'log_compliance_decision',
     'EvidenceExporter',
+    'EvidenceVerificationAgent',
     'EvidenceMonitor',
     'EvidenceAlertSystem'
 ]

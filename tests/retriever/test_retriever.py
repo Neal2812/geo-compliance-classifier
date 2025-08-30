@@ -7,10 +7,10 @@ import shutil
 from pathlib import Path
 import json
 
-from core.rag.loader import DocumentLoader
-from core.rag.chunker import TextChunker, ChunkingConfig
-from core.rag.models import LegalDocument, TextChunk, Jurisdiction
-from core.rag.rank import BM25Scorer, HybridRetriever
+from ingest.loader import DocumentLoader
+from ingest.chunker import TextChunker, ChunkingConfig
+from retriever.models import LegalDocument, TextChunk, Jurisdiction
+from retriever.rank import BM25Scorer, HybridRetriever
 
 
 @pytest.fixture
