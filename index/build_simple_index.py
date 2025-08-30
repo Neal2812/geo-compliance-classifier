@@ -1,13 +1,12 @@
 """
-Vector index builder with FAISS and embedding generation.
+Simple FAISS index builder for testing.
 """
-import pickle
+import json
 import logging
 import time
 from pathlib import Path
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any
 import numpy as np
-import json
 
 try:
     import faiss
@@ -27,8 +26,8 @@ from ingest.chunker import TextChunker, ChunkingConfig
 logger = logging.getLogger(__name__)
 
 
-class VectorIndexBuilder:
-    """Builds and manages FAISS vector index for legal documents."""
+class SimpleVectorIndexBuilder:
+    """Simple FAISS index builder for testing."""
     
     def __init__(self, config_path: str = "config.yaml"):
         """Initialize builder with configuration."""
@@ -53,10 +52,14 @@ class VectorIndexBuilder:
         if SentenceTransformer is None:
             raise ImportError("sentence-transformers is required. Install with: pip install sentence-transformers")
     
-    def build_index(self, index_dir: str = "index") -> IndexStats:
+    def build_index(self, index_dir: str = "index", max_docs: int = 2) -> IndexStats:
         """
-        Build complete vector index from legal documents.
+        Build FAISS index from a limited number of legal documents.
         
+        Args:
+            index_dir: Directory to save index
+            max_docs: Maximum number of documents to process
+            
         Returns:
             Index statistics and build metrics
         """
@@ -64,10 +67,10 @@ class VectorIndexBuilder:
         index_path = Path(index_dir)
         index_path.mkdir(exist_ok=True)
         
-        logger.info("Starting index build process...")
+        logger.info(f"Starting simple index build process (max {max_docs} docs)...")
         
-        # Load and chunk all documents
-        documents = self.loader.load_all_documents()
+        # Load and chunk limited documents
+        documents = self.loader.load_all_documents()[:max_docs]
         all_chunks = []
         
         for doc in documents:
@@ -110,60 +113,6 @@ class VectorIndexBuilder:
         
         return stats
     
-    def load_index(self, index_dir: str = "index") -> bool:
-        """Load existing index from disk."""
-        index_path = Path(index_dir)
-        
-        if not index_path.exists():
-            logger.error(f"Index directory not found: {index_path}")
-            return False
-        
-        try:
-            # Load FAISS index
-            faiss_path = index_path / "faiss" / "index.faiss"
-            if faiss_path.exists():
-                self.index = faiss.read_index(str(faiss_path))
-            else:
-                logger.error("FAISS index file not found")
-                return False
-            
-            # Load metadata
-            metadata_path = index_path / "faiss" / "id_map.jsonl"
-            if metadata_path.exists():
-                self.chunks_metadata = []
-                with open(metadata_path, 'r', encoding='utf-8') as f:
-                    for line in f:
-                        meta = json.loads(line)
-                        # Create TextChunk with proper field mapping
-                        chunk = TextChunk(
-                            chunk_id=meta.get('id', str(meta.get('row', 0))),
-                            law_id=meta.get('law_id', 'Unknown'),
-                            law_name=meta.get('law_name', 'Unknown'),
-                            jurisdiction=meta.get('jurisdiction', 'Unknown'),
-                            section_label=meta.get('section_label', ''),
-                            section_path=meta.get('section_label', ''),
-                            content=meta.get('text', ''),
-                            start_line=meta.get('meta', {}).get('start_line', 0),
-                            end_line=meta.get('meta', {}).get('end_line', 0),
-                            source_path=meta.get('source_path', ''),
-                            char_start=meta.get('meta', {}).get('start_char', 0),
-                            char_end=meta.get('meta', {}).get('end_char', 0)
-                        )
-                        self.chunks_metadata.append(chunk)
-            else:
-                logger.error("Metadata file not found")
-                return False
-            
-            # Load embedding model
-            self._load_embedding_model()
-            
-            logger.info(f"Loaded index with {len(self.chunks_metadata)} chunks")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Failed to load index: {e}")
-            return False
-    
     def _load_embedding_model(self):
         """Load sentence transformer model."""
         model_name = self.embedding_config['model_name']
@@ -173,14 +122,14 @@ class VectorIndexBuilder:
         self.model = SentenceTransformer(model_name, device=device)
     
     def _generate_embeddings(self, chunks: List[TextChunk]) -> np.ndarray:
-        """Generate embeddings for all chunks."""
+        """Generate embeddings for chunks with minimal memory usage."""
         logger.info("Generating embeddings...")
         
         # Extract text content
         texts = [chunk.content for chunk in chunks]
         
-        # Generate embeddings in smaller batches for memory efficiency
-        batch_size = 8  # Reduced from 32 to avoid memory issues
+        # Process in very small batches
+        batch_size = 4
         embeddings = []
         
         try:
@@ -191,11 +140,11 @@ class VectorIndexBuilder:
                 batch_embeddings = self.model.encode(
                     batch_texts,
                     convert_to_numpy=True,
-                    show_progress_bar=False  # Disable progress bar to reduce output
+                    show_progress_bar=False
                 )
                 embeddings.append(batch_embeddings)
                 
-                # Force garbage collection after each batch
+                # Force garbage collection
                 import gc
                 gc.collect()
                 
@@ -261,7 +210,8 @@ class VectorIndexBuilder:
         
         # Also save legacy pickle format for backward compatibility
         metadata_path = index_path / "chunks_metadata.pkl"
-        with open(metadata_path, 'rb') as f:
+        with open(metadata_path, 'wb') as f:
+            import pickle
             pickle.dump(self.chunks_metadata, f)
         
         # Save configuration
@@ -272,6 +222,7 @@ class VectorIndexBuilder:
             'chunking_config': self.chunking_config.__dict__
         }
         with open(config_path, 'wb') as f:
+            import pickle
             pickle.dump(index_info, f)
     
     def _calculate_index_size(self, index_path: Path) -> float:
@@ -281,55 +232,27 @@ class VectorIndexBuilder:
             if file_path.is_file():
                 total_size += file_path.stat().st_size
         return total_size / (1024 * 1024)
-    
-    def search(self, query_embedding: np.ndarray, top_k: int = 5) -> List[Tuple[float, TextChunk]]:
-        """
-        Search index for similar chunks.
-        
-        Args:
-            query_embedding: Normalized query embedding
-            top_k: Number of results to return
-            
-        Returns:
-            List of (score, chunk) tuples
-        """
-        if self.index is None:
-            raise ValueError("Index not loaded. Call load_index() first.")
-        
-        # Normalize query embedding
-        query_embedding = query_embedding.reshape(1, -1)
-        faiss.normalize_L2(query_embedding)
-        
-        # Search index
-        scores, indices = self.index.search(query_embedding, top_k)
-        
-        results = []
-        for score, idx in zip(scores[0], indices[0]):
-            if idx >= 0:  # Valid index
-                chunk = self.chunks_metadata[idx]
-                results.append((float(score), chunk))
-        
-        return results
 
 
 def main():
-    """Main function to build the vector index."""
+    """Main function to build the simple vector index."""
     logging.basicConfig(level=logging.INFO)
     import argparse
     
-    parser = argparse.ArgumentParser(description="Build FAISS vector index")
+    parser = argparse.ArgumentParser(description="Build simple FAISS vector index")
     parser.add_argument("--rebuild", action="store_true", help="Rebuild index even if exists")
     parser.add_argument("--config", default="config.yaml", help="Config file path")
+    parser.add_argument("--max-docs", type=int, default=2, help="Maximum documents to process")
     args = parser.parse_args()
     
-    builder = VectorIndexBuilder(args.config)
+    builder = SimpleVectorIndexBuilder(args.config)
     
     # Check if index exists
     if not args.rebuild and Path("index/faiss/index.faiss").exists():
         print("Index already exists. Use --rebuild to overwrite.")
         return
     
-    stats = builder.build_index()
+    stats = builder.build_index(max_docs=args.max_docs)
     
     print(f"Index built successfully!")
     print(f"Total chunks: {stats.total_chunks}")

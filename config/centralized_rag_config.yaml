@@ -15,6 +15,17 @@ vector_index:
   chunk_size: 512
   chunk_overlap: 50
   max_chunks_per_document: 100
+
+# RAG Configuration
+rag:
+  vectorstore:
+    type: "faiss"
+    index_path: "index/faiss/index.faiss"
+    id_map_path: "index/faiss/id_map.jsonl"
+    metric: "ip"
+    normalize: true
+  retriever:
+    top_k: 5
   
 # Retrieval Configuration
 retrieval:

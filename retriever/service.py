@@ -3,6 +3,8 @@ FastAPI service for regulation retrieval with caching and performance monitoring
 """
 import logging
 import time
+import os
+from datetime import datetime
 from typing import List, Optional, Set
 from functools import lru_cache
 import hashlib
@@ -22,6 +24,9 @@ except ImportError:
 from retriever.models import RetrievalRequest, RetrievalResponse, SearchResult
 from retriever.rank import HybridRetriever
 from index.build_index import VectorIndexBuilder
+from src.evidence import EvidenceExporter
+from fastapi import Query
+from fastapi.responses import Response
 
 
 logger = logging.getLogger(__name__)
@@ -327,6 +332,206 @@ if FastAPI is not None:
             raise HTTPException(status_code=500, detail="Internal server error")
     
     
+    @app.get("/evidence/export")
+    async def export_evidence(
+        start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
+        end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
+        agents: Optional[List[str]] = Query(None, description="Filter by agent names"),
+        limit: Optional[int] = Query(None, ge=1, le=10000, description="Maximum records to export"),
+        format: str = Query("csv", description="Export format (csv or json)")
+    ):
+        """Export evidence logs to challenge CSV format."""
+        try:
+            # Parse dates
+            parsed_start = None
+            parsed_end = None
+            if start_date:
+                parsed_start = datetime.strptime(start_date, '%Y-%m-%d')
+            if end_date:
+                parsed_end = datetime.strptime(end_date, '%Y-%m-%d')
+            
+            # Initialize exporter
+            exporter = EvidenceExporter()
+            
+            if format == "csv":
+                # Generate temporary CSV file
+                import tempfile
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as tmp_file:
+                    count = exporter.export_to_csv(
+                        tmp_file.name, parsed_start, parsed_end, agents, limit
+                    )
+                    
+                    # Read file content
+                    with open(tmp_file.name, 'r') as f:
+                        csv_content = f.read()
+                    
+                    # Clean up
+                    os.unlink(tmp_file.name)
+                
+                return Response(
+                    content=csv_content,
+                    media_type="text/csv",
+                    headers={"Content-Disposition": f"attachment; filename=evidence_export_{datetime.now().strftime('%Y%m%d')}.csv"}
+                )
+            else:
+                # Return JSON summary
+                summary = exporter.get_export_summary(parsed_start, parsed_end, agents)
+                return summary
+                
+        except Exception as e:
+            logger.error(f"Export error: {e}")
+            raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
+    
+    @app.get("/evidence/summary")
+    async def evidence_summary(
+        start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
+        end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
+        agents: Optional[List[str]] = Query(None, description="Filter by agent names")
+    ):
+        """Get evidence export summary."""
+        try:
+            # Parse dates
+            parsed_start = None
+            parsed_end = None
+            if start_date:
+                parsed_start = datetime.strptime(start_date, '%Y-%m-%d')
+            if end_date:
+                parsed_end = datetime.strptime(end_date, '%Y-%m-%d')
+            
+            # Initialize exporter
+            exporter = EvidenceExporter()
+            summary = exporter.get_export_summary(parsed_start, parsed_end, agents)
+            return summary
+            
+        except Exception as e:
+            logger.error(f"Summary error: {e}")
+            raise HTTPException(status_code=500, detail=f"Summary failed: {str(e)}")
+    
+    @app.get("/evidence")
+    async def get_evidence(
+        since: Optional[str] = Query(None, description="Start date (ISO8601)"),
+        until: Optional[str] = Query(None, description="End date (ISO8601)"),
+        agent: Optional[str] = Query(None, description="Filter by agent name"),
+        feature_id: Optional[str] = Query(None, description="Filter by feature ID"),
+        dataset_tag: Optional[str] = Query(None, description="Filter by dataset tag"),
+        decision_flag: Optional[bool] = Query(None, description="Filter by decision flag"),
+        q: Optional[str] = Query(None, description="Search in title/reasoning"),
+        limit: int = Query(50, ge=1, le=500, description="Number of records to return"),
+        offset: int = Query(0, ge=0, description="Number of records to skip"),
+        order: str = Query("timestamp_desc", description="Sort order")
+    ):
+        """Get evidence records with filtering, pagination, and aggregates."""
+        try:
+            # Parse dates
+            parsed_since = None
+            parsed_until = None
+            if since:
+                parsed_since = datetime.fromisoformat(since)
+            if until:
+                parsed_until = datetime.fromisoformat(until)
+            
+            # Initialize exporter
+            exporter = EvidenceExporter()
+            
+            # Get all records for filtering
+            all_records = list(exporter.read_evidence_records(
+                start_date=parsed_since,
+                end_date=parsed_until,
+                agent_filter=[agent] if agent else None
+            ))
+            
+            # Apply additional filters
+            filtered_records = []
+            for record in all_records:
+                # Feature ID filter
+                if feature_id and record.get('feature_id') != feature_id:
+                    continue
+                
+                # Dataset tag filter
+                if dataset_tag and record.get('dataset_tag') != dataset_tag:
+                    continue
+                
+                # Decision flag filter
+                if decision_flag is not None and record.get('decision_flag') != decision_flag:
+                    continue
+                
+                # Text search filter
+                if q:
+                    search_text = f"{record.get('feature_title', '')} {record.get('reasoning_text', '')}".lower()
+                    if q.lower() not in search_text:
+                        continue
+                
+                filtered_records.append(record)
+            
+            # Sort records
+            if order == "timestamp_desc":
+                filtered_records.sort(key=lambda x: x.get('timestamp_iso', ''), reverse=True)
+            elif order == "timestamp_asc":
+                filtered_records.sort(key=lambda x: x.get('timestamp_iso', ''))
+            elif order == "agent_name":
+                filtered_records.sort(key=lambda x: x.get('agent_name', ''))
+            
+            # Apply pagination
+            total_records = len(filtered_records)
+            paginated_records = filtered_records[offset:offset + limit]
+            
+            # Calculate aggregates
+            count_by_decision_flag = {'true': 0, 'false': 0}
+            count_by_agent = {}
+            count_by_regulation = {}
+            total_ms_values = []
+            
+            for record in filtered_records:
+                # Decision flag counts
+                decision = record.get('decision_flag', False)
+                count_by_decision_flag['true' if decision else 'false'] += 1
+                
+                # Agent counts
+                agent_name = record.get('agent_name', 'unknown')
+                count_by_agent[agent_name] = count_by_agent.get(agent_name, 0) + 1
+                
+                # Regulation counts
+                regulations = record.get('related_regulations', [])
+                if isinstance(regulations, list):
+                    for reg in regulations:
+                        count_by_regulation[reg] = count_by_regulation.get(reg, 0) + 1
+                
+                # Timing values
+                timings = record.get('timings_ms', {})
+                if isinstance(timings, dict) and 'total_ms' in timings:
+                    total_ms_values.append(timings['total_ms'])
+            
+            # Calculate percentiles
+            p50_ms = 0
+            p95_ms = 0
+            if total_ms_values:
+                sorted_ms = sorted(total_ms_values)
+                p50_idx = len(sorted_ms) // 2
+                p95_idx = int(len(sorted_ms) * 0.95)
+                p50_ms = sorted_ms[p50_idx] if p50_idx < len(sorted_ms) else 0
+                p95_ms = sorted_ms[p95_idx] if p95_idx < len(sorted_ms) else 0
+            
+            # Top regulations
+            top_regulations = sorted(count_by_regulation.items(), key=lambda x: x[1], reverse=True)[:10]
+            
+            return {
+                'items': paginated_records,
+                'total': total_records,
+                'limit': limit,
+                'offset': offset,
+                'aggregates': {
+                    'count_by_decision_flag': count_by_decision_flag,
+                    'count_by_agent': count_by_agent,
+                    'count_by_regulation': dict(top_regulations),
+                    'p50_ms': p50_ms,
+                    'p95_ms': p95_ms
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Evidence query error: {e}")
+            raise HTTPException(status_code=500, detail=f"Evidence query failed: {str(e)}")
+    
     @app.get("/")
     async def root():
         """Root endpoint with API information."""
@@ -336,9 +541,265 @@ if FastAPI is not None:
             "endpoints": {
                 "health": "/health",
                 "retrieve": "/retrieve",
+                "evidence": "/evidence",
+                "evidence_export": "/evidence/export",
+                "evidence_summary": "/evidence/summary",
+                "dashboard": "/dashboard",
                 "docs": "/docs"
             }
         }
+    
+    @app.get("/dashboard")
+    async def dashboard():
+        """Evidence dashboard HTML page."""
+        html_content = """
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Evidence Dashboard</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
+                .container { max-width: 1200px; margin: 0 auto; }
+                .header { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+                .filters { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+                .filters input, .filters select { margin: 5px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+                .filters button { background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+                .filters button:hover { background: #0056b3; }
+                .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+                .summary-card { background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+                .summary-card h3 { margin: 0 0 10px 0; color: #333; }
+                .summary-card .value { font-size: 24px; font-weight: bold; color: #007bff; }
+                .table-container { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; }
+                table { width: 100%; border-collapse: collapse; }
+                th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+                th { background-color: #f8f9fa; font-weight: bold; }
+                tr:hover { background-color: #f5f5f5; }
+                .pagination { padding: 20px; text-align: center; }
+                .pagination button { margin: 0 5px; padding: 8px 16px; border: 1px solid #ddd; background: white; cursor: pointer; }
+                .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+                .loading { text-align: center; padding: 40px; color: #666; }
+                .error { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; margin: 20px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>Evidence Dashboard</h1>
+                    <p>Monitor compliance decisions and evidence across all agents</p>
+                </div>
+                
+                <div class="filters">
+                    <h3>Filters</h3>
+                    <input type="date" id="since" placeholder="Start Date">
+                    <input type="date" id="until" placeholder="End Date">
+                    <select id="agent">
+                        <option value="">All Agents</option>
+                    </select>
+                    <select id="decision">
+                        <option value="">All Decisions</option>
+                        <option value="true">Compliant</option>
+                        <option value="false">Non-Compliant</option>
+                    </select>
+                    <input type="text" id="search" placeholder="Search in title/reasoning">
+                    <button onclick="loadEvidence()">Apply Filters</button>
+                    <button onclick="exportCSV()">Export CSV</button>
+                </div>
+                
+                <div class="summary" id="summary">
+                    <div class="summary-card">
+                        <h3>Total Records</h3>
+                        <div class="value" id="totalRecords">-</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Compliant</h3>
+                        <div class="value" id="compliantCount">-</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Non-Compliant</h3>
+                        <div class="value" id="nonCompliantCount">-</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>P50 Latency</h3>
+                        <div class="value" id="p50Latency">-</div>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <div id="loading" class="loading">Loading evidence records...</div>
+                    <div id="error" class="error" style="display: none;"></div>
+                    <table id="evidenceTable" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Agent</th>
+                                <th>Feature ID</th>
+                                <th>Decision</th>
+                                <th>Reasoning</th>
+                                <th>Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody id="evidenceBody">
+                        </tbody>
+                    </table>
+                    <div class="pagination" id="pagination" style="display: none;">
+                        <button onclick="previousPage()" id="prevBtn">Previous</button>
+                        <span id="pageInfo">Page 1</span>
+                        <button onclick="nextPage()" id="nextBtn">Next</button>
+                    </div>
+                </div>
+            </div>
+            
+            <script>
+                let currentPage = 0;
+                let totalRecords = 0;
+                let limit = 50;
+                
+                // Load evidence on page load
+                window.onload = function() {
+                    loadEvidence();
+                };
+                
+                async function loadEvidence() {
+                    const loading = document.getElementById('loading');
+                    const error = document.getElementById('error');
+                    const table = document.getElementById('evidenceTable');
+                    const pagination = document.getElementById('pagination');
+                    
+                    loading.style.display = 'block';
+                    error.style.display = 'none';
+                    table.style.display = 'none';
+                    pagination.style.display = 'none';
+                    
+                    try {
+                        const params = new URLSearchParams();
+                        const since = document.getElementById('since').value;
+                        const until = document.getElementById('until').value;
+                        const agent = document.getElementById('agent').value;
+                        const decision = document.getElementById('decision').value;
+                        const search = document.getElementById('search').value;
+                        
+                        if (since) params.append('since', since);
+                        if (until) params.append('until', until);
+                        if (agent) params.append('agent', agent);
+                        if (decision) params.append('decision_flag', decision);
+                        if (search) params.append('q', search);
+                        
+                        params.append('limit', limit);
+                        params.append('offset', currentPage * limit);
+                        params.append('order', 'timestamp_desc');
+                        
+                        const response = await fetch(`/evidence?${params}`);
+                        const data = await response.json();
+                        
+                        if (response.ok) {
+                            displayEvidence(data);
+                            updateSummary(data.aggregates);
+                        } else {
+                            throw new Error(data.detail || 'Failed to load evidence');
+                        }
+                    } catch (err) {
+                        error.textContent = 'Error loading evidence: ' + err.message;
+                        error.style.display = 'block';
+                    } finally {
+                        loading.style.display = 'none';
+                    }
+                }
+                
+                function displayEvidence(data) {
+                    const table = document.getElementById('evidenceTable');
+                    const tbody = document.getElementById('evidenceBody');
+                    const pagination = document.getElementById('pagination');
+                    
+                    tbody.innerHTML = '';
+                    totalRecords = data.total;
+                    
+                    data.items.forEach(record => {
+                        const row = tbody.insertRow();
+                        row.insertCell(0).textContent = new Date(record.timestamp_iso).toLocaleString();
+                        row.insertCell(1).textContent = record.agent_name || 'Unknown';
+                        row.insertCell(2).textContent = record.feature_id || 'Unknown';
+                        row.insertCell(3).textContent = record.decision_flag ? 'Compliant' : 'Non-Compliant';
+                        row.insertCell(4).textContent = (record.reasoning_text || '').substring(0, 100) + '...';
+                        row.insertCell(5).textContent = (record.confidence || 0).toFixed(2);
+                    });
+                    
+                    table.style.display = 'table';
+                    
+                    // Update pagination
+                    if (totalRecords > limit) {
+                        pagination.style.display = 'block';
+                        updatePagination();
+                    }
+                }
+                
+                function updateSummary(aggregates) {
+                    document.getElementById('totalRecords').textContent = aggregates.count_by_decision_flag.true + aggregates.count_by_decision_flag.false;
+                    document.getElementById('compliantCount').textContent = aggregates.count_by_decision_flag.true;
+                    document.getElementById('nonCompliantCount').textContent = aggregates.count_by_decision_flag.false;
+                    document.getElementById('p50Latency').textContent = aggregates.p50_ms + 'ms';
+                }
+                
+                function updatePagination() {
+                    const pageInfo = document.getElementById('pageInfo');
+                    const prevBtn = document.getElementById('prevBtn');
+                    const nextBtn = document.getElementById('nextBtn');
+                    
+                    const totalPages = Math.ceil(totalRecords / limit);
+                    pageInfo.textContent = `Page ${currentPage + 1} of ${totalPages}`;
+                    
+                    prevBtn.disabled = currentPage === 0;
+                    nextBtn.disabled = currentPage >= totalPages - 1;
+                }
+                
+                function previousPage() {
+                    if (currentPage > 0) {
+                        currentPage--;
+                        loadEvidence();
+                    }
+                }
+                
+                function nextPage() {
+                    const totalPages = Math.ceil(totalRecords / limit);
+                    if (currentPage < totalPages - 1) {
+                        currentPage++;
+                        loadEvidence();
+                    }
+                }
+                
+                async function exportCSV() {
+                    try {
+                        const params = new URLSearchParams();
+                        const since = document.getElementById('since').value;
+                        const until = document.getElementById('until').value;
+                        const agent = document.getElementById('agent').value;
+                        
+                        if (since) params.append('start_date', since);
+                        if (until) params.append('end_date', until);
+                        if (agent) params.append('agents', agent);
+                        
+                        const response = await fetch(`/evidence/export?${params}&format=csv`);
+                        if (response.ok) {
+                            const blob = await response.blob();
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = 'evidence_export.csv';
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                        } else {
+                            alert('Failed to export CSV');
+                        }
+                    } catch (err) {
+                        alert('Error exporting CSV: ' + err.message);
+                    }
+                }
+            </script>
+        </body>
+        </html>
+        """
+        return Response(content=html_content, media_type="text/html")
 
 else:
     # Fallback for missing FastAPI

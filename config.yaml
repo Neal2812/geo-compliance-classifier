@@ -20,6 +20,47 @@ index:
   dimension: 384  # all-MiniLM-L6-v2 embedding size
   cache_size: 1000
 
+# RAG Configuration
+rag:
+  vectorstore:
+    type: "faiss"
+    index_path: "index/faiss/index.faiss"
+    id_map_path: "index/faiss/id_map.jsonl"
+    metric: "ip"
+    normalize: true
+  retriever:
+    top_k: 5
+  agents:
+    tiktok_feature_generator:
+      compliance_validation: true
+      regulatory_context_top_k: 3
+    compliance_analyzer:
+      analysis_top_k: 5
+      jurisdiction_filtering: true
+    compliance_reporter:
+      reporting_top_k: 3
+      evidence_logging: true
+
+# Evidence Logging Configuration
+evidence:
+  enabled: true
+  sink:
+    path: "data/evidence"
+    rotation: "by_day"  # by_day or by_size_mb
+    size_mb: 100
+  retention_days: 90
+  redact:
+    enabled: true
+    patterns:
+      - '\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'  # Email
+      - '\b\d{3}[-.]?\d{3}[-.]?\d{4}\b'  # Phone
+      - '\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b'  # Credit card
+      - '\b[A-Z]{2}\d{2}[A-Z0-9]{10,30}\b'  # IBAN
+      - '\b\d{3}-\d{2}-\d{4}\b'  # SSN
+      - '\b[A-Za-z0-9]{20,}\b'  # Long tokens/keys
+  flush_interval: 1
+  sync: false
+
 # Retrieval Configuration
 retrieval:
   bm25_weight: 0.3
