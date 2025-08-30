@@ -7,23 +7,20 @@ import json
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
-from compliance_reporter import (
-    ComplianceReporter, 
-    FeatureCompliance, 
-    RegulatorySummary, 
-    SubmissionDeadline,
-    ComplianceReport
-)
+from compliance_reporter import (ComplianceReport, ComplianceReporter,
+                                 FeatureCompliance, RegulatorySummary,
+                                 SubmissionDeadline)
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 def create_sample_feature_data() -> List[Dict[str, Any]]:
     """Create sample feature compliance data based on the image description"""
-    
+
     return [
         {
             "feature_name": "Curfew login blocker with ASL and GH for Utah minors",
@@ -34,7 +31,7 @@ def create_sample_feature_data() -> List[Dict[str, Any]]:
             "jurisdiction": "Utah, US",
             "implementation_date": "2024-03-15",
             "last_audit_date": "2024-12-01",
-            "risk_level": "LOW"
+            "risk_level": "LOW",
         },
         {
             "feature_name": "PF default toggle with NR enforcement for California teens",
@@ -45,7 +42,7 @@ def create_sample_feature_data() -> List[Dict[str, Any]]:
             "jurisdiction": "California, US",
             "implementation_date": "2024-02-20",
             "last_audit_date": "2024-11-15",
-            "risk_level": "MEDIUM"
+            "risk_level": "MEDIUM",
         },
         {
             "feature_name": "Child abuse content scanner using T5 and CDS triggers",
@@ -56,7 +53,7 @@ def create_sample_feature_data() -> List[Dict[str, Any]]:
             "jurisdiction": "US",
             "implementation_date": "2024-01-10",
             "last_audit_date": "2024-12-10",
-            "risk_level": "HIGH"
+            "risk_level": "HIGH",
         },
         {
             "feature_name": "Content visibility lock with NSP for EU DSA",
@@ -67,7 +64,7 @@ def create_sample_feature_data() -> List[Dict[str, Any]]:
             "jurisdiction": "EU",
             "implementation_date": "2024-04-05",
             "last_audit_date": "2024-11-30",
-            "risk_level": "HIGH"
+            "risk_level": "HIGH",
         },
         {
             "feature_name": "Jellybean-based parental notifications for Florida regulation",
@@ -78,7 +75,7 @@ def create_sample_feature_data() -> List[Dict[str, Any]]:
             "jurisdiction": "Florida, US",
             "implementation_date": "2024-03-01",
             "last_audit_date": "2024-12-05",
-            "risk_level": "MEDIUM"
+            "risk_level": "MEDIUM",
         },
         {
             "feature_name": "Unified retention control via DRT & CDS",
@@ -89,7 +86,7 @@ def create_sample_feature_data() -> List[Dict[str, Any]]:
             "jurisdiction": "EEA",
             "implementation_date": "2024-01-25",
             "last_audit_date": "2024-11-20",
-            "risk_level": "LOW"
+            "risk_level": "LOW",
         },
         {
             "feature_name": "NSP auto-flagging",
@@ -100,7 +97,7 @@ def create_sample_feature_data() -> List[Dict[str, Any]]:
             "jurisdiction": "Global",
             "implementation_date": "2024-05-10",
             "last_audit_date": "2024-12-01",
-            "risk_level": "MEDIUM"
+            "risk_level": "MEDIUM",
         },
         {
             "feature_name": "T5 tagging for sensitive reports",
@@ -111,7 +108,7 @@ def create_sample_feature_data() -> List[Dict[str, Any]]:
             "jurisdiction": "EU",
             "implementation_date": "2024-02-15",
             "last_audit_date": "2024-11-25",
-            "risk_level": "MEDIUM"
+            "risk_level": "MEDIUM",
         },
         {
             "feature_name": "Underage protection via Snowcap trigger",
@@ -122,7 +119,7 @@ def create_sample_feature_data() -> List[Dict[str, Any]]:
             "jurisdiction": "Global",
             "implementation_date": "2024-06-01",
             "last_audit_date": "2024-12-15",
-            "risk_level": "CRITICAL"
+            "risk_level": "CRITICAL",
         },
         {
             "feature_name": "Universal PF deactivation on guest mode",
@@ -133,13 +130,14 @@ def create_sample_feature_data() -> List[Dict[str, Any]]:
             "jurisdiction": "Global",
             "implementation_date": "2024-04-20",
             "last_audit_date": "2024-11-10",
-            "risk_level": "LOW"
-        }
+            "risk_level": "LOW",
+        },
     ]
+
 
 def create_sample_regulatory_summaries() -> List[Dict[str, Any]]:
     """Create sample regulatory summaries"""
-    
+
     return [
         {
             "regulation_name": "EU Digital Markets Act (DMA)",
@@ -150,22 +148,22 @@ def create_sample_regulatory_summaries() -> List[Dict[str, Any]]:
                 "Data portability",
                 "Alternative app stores",
                 "Choice screens",
-                "Bundling restrictions"
+                "Bundling restrictions",
             ],
             "reporting_deadlines": [
                 {"type": "Annual Compliance Report", "due_date": "2025-03-01"},
-                {"type": "Quarterly Metrics", "due_date": "2025-01-15"}
+                {"type": "Quarterly Metrics", "due_date": "2025-01-15"},
             ],
             "compliance_triggers": [
                 "Designation as gatekeeper",
                 "Core platform service changes",
-                "Market position changes"
+                "Market position changes",
             ],
             "enforcement_actions": [
                 "Fines up to 10% of global turnover",
                 "Behavioral remedies",
-                "Structural remedies"
-            ]
+                "Structural remedies",
+            ],
         },
         {
             "regulation_name": "GDPR",
@@ -176,22 +174,22 @@ def create_sample_regulatory_summaries() -> List[Dict[str, Any]]:
                 "Consent management",
                 "Data subject rights",
                 "Data minimization",
-                "Purpose limitation"
+                "Purpose limitation",
             ],
             "reporting_deadlines": [
                 {"type": "Breach Notification", "due_date": "Within 72 hours"},
-                {"type": "Annual Privacy Report", "due_date": "2025-01-31"}
+                {"type": "Annual Privacy Report", "due_date": "2025-01-31"},
             ],
             "compliance_triggers": [
                 "Personal data processing",
                 "Data subject requests",
-                "Data breaches"
+                "Data breaches",
             ],
             "enforcement_actions": [
                 "Fines up to €20 million or 4% of global turnover",
                 "Corrective powers",
-                "Suspension of data processing"
-            ]
+                "Suspension of data processing",
+            ],
         },
         {
             "regulation_name": "COPPA",
@@ -201,148 +199,150 @@ def create_sample_regulatory_summaries() -> List[Dict[str, Any]]:
                 "Age verification",
                 "Data minimization for children",
                 "Safe harbor provisions",
-                "Notice requirements"
+                "Notice requirements",
             ],
             "reporting_deadlines": [
                 {"type": "Annual Safe Harbor Certification", "due_date": "2025-02-28"},
-                {"type": "Incident Reporting", "due_date": "Within 30 days"}
+                {"type": "Incident Reporting", "due_date": "Within 30 days"},
             ],
             "compliance_triggers": [
                 "Collection of personal information from children under 13",
                 "Changes to privacy practices",
-                "Data breaches involving children"
+                "Data breaches involving children",
             ],
             "enforcement_actions": [
                 "Civil penalties up to $50,120 per violation",
                 "Injunctive relief",
-                "Corrective actions"
-            ]
-        }
+                "Corrective actions",
+            ],
+        },
     ]
+
 
 def create_sample_submission_calendar() -> List[Dict[str, Any]]:
     """Create sample submission calendar with deadlines"""
-    
+
     today = datetime.now()
-    
+
     return [
         {
             "regulation": "EU DMA",
             "report_type": "Annual Compliance Report",
-            "next_due": (today + timedelta(days=45)).strftime('%Y-%m-%d'),
+            "next_due": (today + timedelta(days=45)).strftime("%Y-%m-%d"),
             "frequency": "ANNUAL",
             "audience": "Regulator",
             "status": "UPCOMING",
-            "priority": "HIGH"
+            "priority": "HIGH",
         },
         {
             "regulation": "GDPR",
             "report_type": "Annual Privacy Report",
-            "next_due": (today + timedelta(days=15)).strftime('%Y-%m-%d'),
+            "next_due": (today + timedelta(days=15)).strftime("%Y-%m-%d"),
             "frequency": "ANNUAL",
             "audience": "Regulator",
             "status": "UPCOMING",
-            "priority": "HIGH"
+            "priority": "HIGH",
         },
         {
             "regulation": "COPPA",
             "report_type": "Safe Harbor Certification",
-            "next_due": (today + timedelta(days=60)).strftime('%Y-%m-%d'),
+            "next_due": (today + timedelta(days=60)).strftime("%Y-%m-%d"),
             "frequency": "ANNUAL",
             "audience": "Regulator",
             "status": "UPCOMING",
-            "priority": "MEDIUM"
+            "priority": "MEDIUM",
         },
         {
             "regulation": "EU DSA",
             "report_type": "Transparency Report",
-            "next_due": (today - timedelta(days=5)).strftime('%Y-%m-%d'),
+            "next_due": (today - timedelta(days=5)).strftime("%Y-%m-%d"),
             "frequency": "ANNUAL",
             "audience": "Regulator",
             "status": "OVERDUE",
-            "priority": "CRITICAL"
-        }
+            "priority": "CRITICAL",
+        },
     ]
+
 
 def main():
     """Main example demonstrating compliance reporting workflow"""
-    
+
     logger.info("Starting Compliance Reporting Example")
-    
+
     # Initialize the compliance reporter
     reporter = ComplianceReporter()
-    
+
     # Create sample data
     features_data = create_sample_feature_data()
     regulatory_summaries = create_sample_regulatory_summaries()
     submission_calendar = create_sample_submission_calendar()
-    
+
     logger.info(f"Created {len(features_data)} sample features")
     logger.info(f"Created {len(regulatory_summaries)} regulatory summaries")
     logger.info(f"Created {len(submission_calendar)} submission deadlines")
-    
+
     # Ingest compliance data
     compliance_data = reporter.ingest_compliance_data(
         features_data=features_data,
         regulatory_summaries=regulatory_summaries,
-        submission_calendar=submission_calendar
+        submission_calendar=submission_calendar,
     )
-    
+
     logger.info("Successfully ingested compliance data")
-    
+
     # Generate comprehensive compliance report
     report = reporter.generate_compliance_report(
         compliance_data=compliance_data,
         report_id="2025-01-15-COMPLIANCE-DEMO",
-        audiences=["Internal", "Regulator", "Executive"]
+        audiences=["Internal", "Regulator", "Executive"],
     )
-    
+
     logger.info(f"Generated compliance report: {report.report_id}")
     logger.info(f"Summary stats: {report.summary_stats}")
-    
+
     # Export report in different formats
-    json_file = reporter.export_report(report, output_format='json')
-    yaml_file = reporter.export_report(report, output_format='yaml')
-    
+    json_file = reporter.export_report(report, output_format="json")
+    yaml_file = reporter.export_report(report, output_format="yaml")
+
     logger.info(f"Exported JSON report: {json_file}")
     logger.info(f"Exported YAML report: {yaml_file}")
-    
+
     # Track deadlines
-    deadline_tracking = reporter.track_deadlines(compliance_data['deadlines'])
+    deadline_tracking = reporter.track_deadlines(compliance_data["deadlines"])
     logger.info(f"Deadline tracking summary: {deadline_tracking['summary']}")
-    
+
     # Generate audit trail
-    audit_trail = reporter.generate_audit_trail(compliance_data['features'])
+    audit_trail = reporter.generate_audit_trail(compliance_data["features"])
     logger.info(f"Generated audit trail with {len(audit_trail)} entries")
-    
+
     # Schedule a report job (example)
     schedule_config = {
         "frequency": "weekly",
         "audiences": ["Internal", "Regulator"],
-        "report_types": ["summary", "detailed"]
+        "report_types": ["summary", "detailed"],
     }
-    
+
     job_id = reporter.schedule_report_job(compliance_data, schedule_config)
     logger.info(f"Scheduled report job: {job_id}")
-    
+
     # Print summary of generated files
     output_dir = Path(reporter.output_dir)
     generated_files = list(output_dir.rglob("*"))
-    
+
     logger.info("Generated files:")
     for file_path in generated_files:
         if file_path.is_file():
             logger.info(f"  - {file_path.relative_to(output_dir)}")
-    
+
     # Display key metrics
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("COMPLIANCE REPORT SUMMARY")
-    print("="*60)
+    print("=" * 60)
     print(f"Report ID: {report.report_id}")
     print(f"Generated: {report.generated_date}")
     print(f"Dashboard URL: {report.dashboard_url}")
     print()
-    
+
     print("SUMMARY STATISTICS:")
     print(f"  Total Features: {report.summary_stats['total_features']}")
     print(f"  Geo Compliant: {report.summary_stats['geo_compliant']}")
@@ -351,29 +351,32 @@ def main():
     print(f"  Compliance Rate: {report.summary_stats['compliance_rate']}%")
     print(f"  Risk Rate: {report.summary_stats['risk_rate']}%")
     print()
-    
+
     print("RISK ANALYSIS:")
     print(f"  High Risk Features: {report.risk_analysis['high_risk_features']}")
     print(f"  Non Compliant Features: {report.risk_analysis['non_compliant_features']}")
     print(f"  Overdue Deadlines: {report.risk_analysis['overdue_deadlines']}")
     print()
-    
+
     print("DEADLINE ALERTS:")
-    for alert in deadline_tracking['alerts']:
+    for alert in deadline_tracking["alerts"]:
         print(f"  - {alert}")
     print()
-    
+
     print("RECOMMENDATIONS:")
     for rec in report.recommendations:
         print(f"  - {rec}")
     print()
-    
+
     print("GENERATED REPORTS:")
     for report_info in report.reports:
-        print(f"  - {report_info['audience']} ({report_info['format']}): {report_info['report_file']}")
-    
-    print("\n" + "="*60)
+        print(
+            f"  - {report_info['audience']} ({report_info['format']}): {report_info['report_file']}"
+        )
+
+    print("\n" + "=" * 60)
     logger.info("Compliance reporting example completed successfully!")
 
+
 if __name__ == "__main__":
-    main() 
+    main()

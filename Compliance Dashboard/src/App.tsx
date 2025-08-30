@@ -2,6 +2,7 @@ import { Header } from "./components/Header";
 import { ComplianceForm } from "./components/ComplianceForm";
 import { AgentStatusPanel } from "./components/AgentStatusPanel";
 import { ResultsSection } from "./components/ResultsSection";
+import { MCPChat } from "./components/MCPChat";
 
 export default function App() {
   return (
@@ -24,6 +25,16 @@ export default function App() {
         {/* Results Section */}
         <div className="mt-6">
           <ResultsSection />
+        </div>
+        
+        {/* MCP Chat Section */}
+        <div className="mt-6">
+          <div className="container mx-auto px-6">
+            <h2 className="text-2xl font-bold mb-4">MCP Compliance Analysis</h2>
+            <div className="h-96">
+              <MCPChat />
+            </div>
+          </div>
         </div>
       </div>
     </div>

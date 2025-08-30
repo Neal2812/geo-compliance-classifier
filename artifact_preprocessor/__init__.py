@@ -2,6 +2,6 @@
 
 __version__ = "1.0.0"
 
-from .schema import DocumentArtifact, FeatureRecord, CodenameHit
+from .schema import CodenameHit, DocumentArtifact, FeatureRecord
 
 __all__ = ["DocumentArtifact", "FeatureRecord", "CodenameHit"]

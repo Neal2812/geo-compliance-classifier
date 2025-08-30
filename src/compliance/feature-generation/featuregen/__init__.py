@@ -35,8 +35,9 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 try:
-    from tiktok_feature_generator import TikTokFeatureGenerator, FeatureData
-    __all__ = ['TikTokFeatureGenerator', 'FeatureData']
+    from tiktok_feature_generator import FeatureData, TikTokFeatureGenerator
+
+    __all__ = ["TikTokFeatureGenerator", "FeatureData"]
 except ImportError:
     # Fallback for when running as standalone module
     __all__ = []

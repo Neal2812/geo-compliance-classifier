@@ -33,7 +33,9 @@ def extract_text_from_pdf(path: str | Path) -> str:
 def _main(argv: Optional[list[str]] = None) -> int:
     p = argparse.ArgumentParser(description="Extract text from PDF using PyPDF2")
     p.add_argument("--pdf", required=True, help="Path to the PDF file")
-    p.add_argument("--out", help="Optional output text file; if omitted prints to stdout")
+    p.add_argument(
+        "--out", help="Optional output text file; if omitted prints to stdout"
+    )
     args = p.parse_args(argv)
 
     text = extract_text_from_pdf(args.pdf)

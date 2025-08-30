@@ -179,5 +179,27 @@
     "model_used": "Legal-BERT",
     "correction_type": "label_correction",
     "impact_score": 0.8999999999999999
+  },
+  {
+    "case_id": "CORR-9e4dfa21",
+    "timestamp": "2025-08-31T04:24:20.355339",
+    "original_prediction": "Compliant",
+    "corrected_label": "Non-Compliant",
+    "reviewer_reasoning": "Utah age verification requirements not met for users under 18",
+    "feature_characteristics": {
+      "geographic": {
+        "state": "Utah",
+        "country": "USA"
+      },
+      "demographic": {
+        "age_min": 13,
+        "age_max": 17
+      },
+      "regulation_type": "Age Verification"
+    },
+    "confidence_score": 0.85,
+    "model_used": "Legal-BERT",
+    "correction_type": "label_correction",
+    "impact_score": 0.8999999999999999
   }
 ]
