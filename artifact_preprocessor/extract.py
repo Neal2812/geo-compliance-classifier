@@ -47,22 +47,6 @@ class FieldExtractor:
             Dictionary mapping field names to pattern lists
         """
         return {
-            'doc_title': [
-                r'(?i)^title:?\s*(.+)$',
-                r'(?i)^document\s+title:?\s*(.+)$',
-                r'(?i)^name:?\s*(.+)$',
-            ],
-            'version': [
-                r'(?i)^version:?\s*(.+)$',
-                r'(?i)^v\s*([0-9.]+)',
-                r'(?i)version\s+([0-9.]+)',
-            ],
-            'authors': [
-                r'(?i)^authors?:?\s*(.+)$',
-                r'(?i)^written\s+by:?\s*(.+)$',
-                r'(?i)^created\s+by:?\s*(.+)$',
-                r'(?i)^owner:?\s*(.+)$',
-            ],
             'date': [
                 r'(?i)^date:?\s*(.+)$',
                 r'(?i)^created:?\s*(.+)$',
@@ -89,56 +73,23 @@ class FieldExtractor:
                 r'(?i)^purpose:?\s*(.+)$',
                 r'(?i)^aims?:?\s*(.+)$',
             ],
-            'scope': [
-                r'(?i)^scope:?\s*(.+)$',
-                r'(?i)^coverage:?\s*(.+)$',
-                r'(?i)^boundaries:?\s*(.+)$',
-            ],
             'user_segments': [
                 r'(?i)^(?:target\s+)?users?:?\s*(.+)$',
                 r'(?i)^(?:user\s+)?segments?:?\s*(.+)$',
                 r'(?i)^audience:?\s*(.+)$',
                 r'(?i)^demographics:?\s*(.+)$',
             ],
-            'risk_safety': [
-                r'(?i)^(?:risk|safety):?\s*(.+)$',
-                r'(?i)^(?:risk\s+)?assessment:?\s*(.+)$',
-                r'(?i)^safety\s+considerations:?\s*(.+)$',
-                r'(?i)^risks?\s+and\s+mitigations?:?\s*(.+)$',
-            ],
-            'privacy_data': [
-                r'(?i)^privacy:?\s*(.+)$',
-                r'(?i)^data\s+privacy:?\s*(.+)$',
-                r'(?i)^data\s+protection:?\s*(.+)$',
-                r'(?i)^pii:?\s*(.+)$',
-                r'(?i)^personal\s+data:?\s*(.+)$',
-            ],
-            'age_gating': [
-                r'(?i)^age\s+gating:?\s*(.+)$',
-                r'(?i)^age\s+restrictions?:?\s*(.+)$',
-                r'(?i)^minor\s+protection:?\s*(.+)$',
-                r'(?i)^child\s+safety:?\s*(.+)$',
-                r'(?i)^coppa:?\s*(.+)$',
-            ],
-            'geo_regions': [
-                r'(?i)^(?:geo|geographic)\s+regions?:?\s*(.+)$',
-                r'(?i)^locations?:?\s*(.+)$',
+            'geo_country': [
+                r'(?i)^country:?\s*(.+)$',
                 r'(?i)^countries:?\s*(.+)$',
-                r'(?i)^territories:?\s*(.+)$',
-                r'(?i)^jurisdictions?:?\s*(.+)$',
+                r'(?i)^nation:?\s*(.+)$',
+                r'(?i)^jurisdiction:?\s*(.+)$',
             ],
-            'rollout': [
-                r'(?i)^rollout:?\s*(.+)$',
-                r'(?i)^deployment:?\s*(.+)$',
-                r'(?i)^launch\s+plan:?\s*(.+)$',
-                r'(?i)^timeline:?\s*(.+)$',
-                r'(?i)^schedule:?\s*(.+)$',
-            ],
-            'open_questions': [
-                r'(?i)^(?:open\s+)?questions?:?\s*(.+)$',
-                r'(?i)^outstanding\s+issues?:?\s*(.+)$',
-                r'(?i)^(?:to\s+be\s+)?(?:determined|resolved):?\s*(.+)$',
-                r'(?i)^tbd:?\s*(.+)$',
+            'geo_state': [
+                r'(?i)^state:?\s*(.+)$',
+                r'(?i)^province:?\s*(.+)$',
+                r'(?i)^region:?\s*(.+)$',
+                r'(?i)^territory:?\s*(.+)$',
             ],
         }
     

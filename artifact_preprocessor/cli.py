@@ -249,12 +249,9 @@ def process_feature_csv(
     record = FeatureRecord(
         feature_id=feature_id,
         doc_id="features_csv",
-        doc_type="csv",
         source_path="features.csv",
         feature_title=fields.get('feature_title'),
         feature_description=fields.get('feature_description'),
-        text_original_hash=text_hash,
-        text_expanded_hash=expanded_hash,
         codename_hits=hits
     )
     
@@ -293,27 +290,15 @@ def process_document(
     record = FeatureRecord(
         feature_id=feature_id,
         doc_id=doc_artifact.doc_id,
-        doc_type=doc_artifact.doc_type,
         source_path=doc_artifact.source_path,
-        doc_title=fields.get('doc_title'),
-        version=fields.get('version'),
-        authors=fields.get('authors'),
         date=fields.get('date'),
         feature_title=fields.get('feature_title'),
         feature_description=fields.get('feature_description'),
         objectives=fields.get('objectives'),
-        scope=fields.get('scope'),
         user_segments=fields.get('user_segments'),
-        risk_safety=fields.get('risk_safety'),
-        privacy_data=fields.get('privacy_data'),
-        age_gating=fields.get('age_gating'),
-        geo_regions=fields.get('geo_regions'),
-        rollout=fields.get('rollout'),
-        open_questions=fields.get('open_questions'),
-        text_original_hash=text_hash,
-        text_expanded_hash=expanded_hash,
-        codename_hits=hits,
-        parse_warnings=doc_artifact.parse_warnings
+        geo_country=fields.get('geo_country'),
+        geo_state=fields.get('geo_state'),
+        codename_hits=hits
     )
     
     return [record]

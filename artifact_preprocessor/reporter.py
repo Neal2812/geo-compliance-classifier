@@ -71,10 +71,8 @@ class ProcessingReporter:
         """
         docs_parsed = len(set(record.doc_id for record in records))
         
-        # Collect all warnings
+        # Collect all warnings - skip since parse_warnings is removed
         all_warnings = []
-        for record in records:
-            all_warnings.extend(record.parse_warnings)
         
         # Collect expansion statistics
         all_hits = []
@@ -127,21 +125,22 @@ class ProcessingReporter:
             "",
         ]
         
-        # Document type breakdown
+        # Document type breakdown - skip since doc_type is removed
+        # Compliance domain breakdown
         if records:
-            doc_types = {}
+            domains = {}
             for record in records:
-                doc_type = record.doc_type
-                if doc_type not in doc_types:
-                    doc_types[doc_type] = 0
-                doc_types[doc_type] += 1
+                domain = record.domain or "Unknown"
+                if domain not in domains:
+                    domains[domain] = 0
+                domains[domain] += 1
             
             lines.extend([
-                "## Document Type Breakdown",
+                "## Domain Breakdown",
                 "",
             ])
-            for doc_type, count in sorted(doc_types.items()):
-                lines.append(f"- **{doc_type.upper()}:** {count} documents")
+            for domain, count in sorted(domains.items()):
+                lines.append(f"- **{domain.title()}:** {count} features")
             lines.append("")
         
         # Field extraction statistics
@@ -229,10 +228,9 @@ class ProcessingReporter:
             Dictionary mapping field names to (filled, total) counts
         """
         field_names = [
-            'doc_title', 'version', 'authors', 'date',
-            'feature_title', 'feature_description',
-            'objectives', 'scope', 'user_segments', 'risk_safety',
-            'privacy_data', 'age_gating', 'geo_regions', 'rollout', 'open_questions'
+            'date', 'feature_title', 'feature_description',
+            'objectives', 'user_segments', 'geo_country', 'geo_state',
+            'domain', 'label', 'rationale'
         ]
         
         stats = {}

@@ -45,13 +45,9 @@ class FeatureRecord:
     # Core identifiers
     feature_id: str
     doc_id: str
-    doc_type: str
     source_path: str
     
     # Document metadata
-    doc_title: Optional[str] = None
-    version: Optional[str] = None
-    authors: Optional[str] = None
     date: Optional[str] = None
     
     # Feature content
@@ -60,52 +56,45 @@ class FeatureRecord:
     
     # Extracted sections
     objectives: Optional[str] = None
-    scope: Optional[str] = None
     user_segments: Optional[str] = None
-    risk_safety: Optional[str] = None
-    privacy_data: Optional[str] = None
-    age_gating: Optional[str] = None
-    geo_regions: Optional[str] = None
-    rollout: Optional[str] = None
-    open_questions: Optional[str] = None
-    appendix_raw: Optional[str] = None
     
-    # Text hashes
-    text_original_hash: str = ""
-    text_expanded_hash: str = ""
+    # Geographic information
+    geo_country: Optional[str] = None
+    geo_state: Optional[str] = None  # N/A for smaller countries with no states
     
     # Codename expansion
     codename_hits: List[CodenameHit] = field(default_factory=list)
     
-    # Processing metadata
-    parse_warnings: List[str] = field(default_factory=list)
+    # Compliance analysis
+    domain: Optional[str] = None  # area of feature (recommendations, advertising, safety, etc.)
+    label: Optional[str] = None  # non-compliant, partially-compliant, compliant
+    implicated_regulations: List[str] = field(default_factory=list)  # exact legal regulations
+    data_practices: List[str] = field(default_factory=list)  # intervention_logs, content_analysis, etc.
+    rationale: Optional[str] = None  # why the regulations apply to this feature
+    risk_tags: List[str] = field(default_factory=list)  # addiction_risk, minor_targeting, etc.
+    confidence_score: Optional[float] = None
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON/CSV output."""
         return {
             "feature_id": self.feature_id,
             "doc_id": self.doc_id,
-            "doc_type": self.doc_type,
-            "doc_title": self.doc_title,
-            "version": self.version,
-            "authors": self.authors,
             "date": self.date,
             "feature_title": self.feature_title,
             "feature_description": self.feature_description,
             "objectives": self.objectives,
-            "scope": self.scope,
             "user_segments": self.user_segments,
-            "risk_safety": self.risk_safety,
-            "privacy_data": self.privacy_data,
-            "age_gating": self.age_gating,
-            "geo_regions": self.geo_regions,
-            "rollout": self.rollout,
-            "open_questions": self.open_questions,
-            "text_original_hash": self.text_original_hash,
-            "text_expanded_hash": self.text_expanded_hash,
+            "geo_country": self.geo_country,
+            "geo_state": self.geo_state,
             "codename_hits_json": [hit.to_dict() for hit in self.codename_hits],
-            "parse_warnings": "; ".join(self.parse_warnings),
-            "source_path": self.source_path
+            "source_path": self.source_path,
+            "domain": self.domain,
+            "label": self.label,
+            "implicated_regulations": self.implicated_regulations,
+            "data_practices": self.data_practices,
+            "rationale": self.rationale,
+            "risk_tags": self.risk_tags,
+            "confidence_score": self.confidence_score
         }
 
 
@@ -116,24 +105,13 @@ OUTPUT_SCHEMA = {
     "properties": {
         "feature_id": {"type": "string"},
         "doc_id": {"type": "string"},
-        "doc_type": {"type": "string"},
-        "doc_title": {"type": ["string", "null"]},
-        "version": {"type": ["string", "null"]},
-        "authors": {"type": ["string", "null"]},
         "date": {"type": ["string", "null"]},
         "feature_title": {"type": ["string", "null"]},
         "feature_description": {"type": ["string", "null"]},
         "objectives": {"type": ["string", "null"]},
-        "scope": {"type": ["string", "null"]},
         "user_segments": {"type": ["string", "null"]},
-        "risk_safety": {"type": ["string", "null"]},
-        "privacy_data": {"type": ["string", "null"]},
-        "age_gating": {"type": ["string", "null"]},
-        "geo_regions": {"type": ["string", "null"]},
-        "rollout": {"type": ["string", "null"]},
-        "open_questions": {"type": ["string", "null"]},
-        "text_original_hash": {"type": "string"},
-        "text_expanded_hash": {"type": "string"},
+        "geo_country": {"type": ["string", "null"]},
+        "geo_state": {"type": ["string", "null"]},
         "codename_hits_json": {
             "type": "array",
             "items": {
@@ -155,9 +133,27 @@ OUTPUT_SCHEMA = {
                 "required": ["term", "expansion", "count", "spans"]
             }
         },
-        "parse_warnings": {"type": "string"},
-        "source_path": {"type": "string"}
+        "source_path": {"type": "string"},
+        "domain": {"type": ["string", "null"]},
+        "label": {
+            "type": ["string", "null"],
+            "enum": ["non-compliant", "partially-compliant", "compliant", None]
+        },
+        "implicated_regulations": {
+            "type": "array",
+            "items": {"type": "string"}
+        },
+        "data_practices": {
+            "type": "array",
+            "items": {"type": "string"}
+        },
+        "rationale": {"type": ["string", "null"]},
+        "risk_tags": {
+            "type": "array",
+            "items": {"type": "string"}
+        },
+        "confidence_score": {"type": ["number", "null"]}
     },
-    "required": ["feature_id", "doc_id", "doc_type", "text_original_hash", 
-                "text_expanded_hash", "codename_hits_json", "parse_warnings", "source_path"]
+    "required": ["feature_id", "doc_id", "codename_hits_json", "source_path", 
+                "implicated_regulations", "data_practices", "risk_tags"]
 }
