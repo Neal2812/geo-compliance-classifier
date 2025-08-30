@@ -83,7 +83,7 @@ def test_confidence_validator_integration():
     print("\n🔍 Testing Confidence Validator Agent Integration...")
     
     try:
-        from src.confidence_validator import ConfidenceValidatorAgent
+        from src.agents import ConfidenceValidatorAgent
         
         # Test with centralized RAG
         agent = ConfidenceValidatorAgent(rag_base_url="http://localhost:8000")
@@ -116,7 +116,7 @@ def test_active_learning_integration():
     print("\n🔍 Testing Active Learning Agent Integration...")
     
     try:
-        from src.active_learning_agent import ActiveLearningAgent
+        from src.agents import ActiveLearningAgent
         
         # Test with centralized RAG
         agent = ActiveLearningAgent(rag_base_url="http://localhost:8000")

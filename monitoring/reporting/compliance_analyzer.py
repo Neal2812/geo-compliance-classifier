@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 # Add RAG adapter import
 try:
     sys.path.append(str(Path(__file__).parent.parent.parent))
-    from src.rag_adapter import RAGAdapter
-    from src.evidence_logger import log_compliance_decision
+    from src.rag import RAGAdapter
+    from src.evidence import log_compliance_decision
     import uuid
     from datetime import datetime
 except ImportError:

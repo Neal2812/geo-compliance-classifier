@@ -6,7 +6,7 @@ This script demonstrates how the agent tracks human corrections,
 identifies patterns, and triggers retraining to reduce human review effort.
 """
 
-from src.active_learning_agent import ActiveLearningAgent
+from src.agents import ActiveLearningAgent
 from datetime import datetime, timedelta
 import uuid
 

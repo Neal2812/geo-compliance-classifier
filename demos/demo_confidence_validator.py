@@ -8,7 +8,7 @@ using three different models and applies ensemble logic.
 
 import os
 import sys
-from src.confidence_validator import ConfidenceValidatorAgent
+from src.agents import ConfidenceValidatorAgent
 
 
 def main():

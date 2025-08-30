@@ -26,8 +26,8 @@ logger = logging.getLogger(__name__)
 # Add RAG adapter import
 try:
     sys.path.append(str(Path(__file__).parent.parent.parent))
-    from src.rag_adapter import RAGAdapter
-    from src.evidence_logger import log_compliance_decision
+    from src.rag import RAGAdapter
+    from src.evidence import log_compliance_decision
 except ImportError:
     RAGAdapter = None
     log_compliance_decision = None

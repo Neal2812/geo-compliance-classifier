@@ -24,7 +24,7 @@ except ImportError:
 from retriever.models import RetrievalRequest, RetrievalResponse, SearchResult
 from retriever.rank import HybridRetriever
 from index.build_index import VectorIndexBuilder
-from src.evidence_exporter import EvidenceExporter
+from src.evidence import EvidenceExporter
 from fastapi import Query
 from fastapi.responses import Response
 

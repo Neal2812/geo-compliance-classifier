@@ -7,7 +7,7 @@ from pathlib import Path
 
 # Add parent directory to path for RAG adapter
 sys.path.append(str(Path(__file__).parent.parent))
-from rag_adapter import RAGAdapter
+from src.rag import RAGAdapter
 
 
 class LLMRAGModel:
