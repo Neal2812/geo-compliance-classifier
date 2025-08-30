@@ -35,7 +35,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 try:
-    from tiktok_feature_generator import FeatureData, TikTokFeatureGenerator
+    from ignored.tiktok_feature_generator import FeatureData, TikTokFeatureGenerator
 
     __all__ = ["TikTokFeatureGenerator", "FeatureData"]
 except ImportError:

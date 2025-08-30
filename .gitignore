@@ -36,3 +36,6 @@ venv.bak/
 # Temporary files
 *.tmp
 *.temp
+
+
+ignored

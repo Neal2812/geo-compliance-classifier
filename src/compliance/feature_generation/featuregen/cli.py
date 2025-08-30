@@ -12,7 +12,7 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from tiktok_feature_generator import TikTokFeatureGenerator
+from ignored.tiktok_feature_generator import TikTokFeatureGenerator
 
 
 def parse_label_mix(label_mix_str: str) -> dict:
