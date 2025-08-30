@@ -6,7 +6,7 @@ This script adds more corrections to trigger pattern analysis
 and demonstrates the full functionality of the system.
 """
 
-from src.active_learning_agent import ActiveLearningAgent
+from core.agents.active_learning_agent import ActiveLearningAgent
 from datetime import datetime, timedelta
 import uuid
 

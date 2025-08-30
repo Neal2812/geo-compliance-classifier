@@ -6,9 +6,9 @@ This script tests the Confidence Validator Agent, Evidence Verification Agent,
 and Active Learning Agent together to ensure they work as an integrated system.
 """
 
-from src.confidence_validator import ConfidenceValidatorAgent
-from src.evidence_verifier import EvidenceVerificationAgent
-from src.active_learning_agent import ActiveLearningAgent
+from core.agents.confidence_validator import ConfidenceValidatorAgent
+from core.agents.evidence_verifier import EvidenceVerificationAgent
+from core.agents.active_learning_agent import ActiveLearningAgent
 from datetime import datetime, timedelta
 import uuid
 

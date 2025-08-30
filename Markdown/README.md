@@ -1,18 +1,218 @@
-# 🌍 Geo-Compliance Classifier Suite
+# 🌍 Social Media Compliance Framework
 
-A comprehensive multi-agent system for automated compliance classification, document preprocessing, and legal regulation retrieval designed for global platform compliance across jurisdictions.
+A comprehensive, multi-jurisdictional compliance system for social media platforms to meet regulatory obligations across the EU, United States, and other global jurisdictions.
 
 ## 🎯 Overview
 
-This repository contains a complete ecosystem of specialized agents for geo-compliance automation:
+This repository provides production-ready compliance implementations for:
 
-- **📝 Artifact Preprocessor Agent**: Normalizes and extracts structured data from PRD/TRD documents
-- **🔍 Regulation Retriever Agent**: Sub-second legal snippet retrieval from vector-indexed regulations  
-- **✅ Confidence Validator Agent**: Multi-model ensemble for reliable compliance predictions
-- **🤖 Evidence Verifier Agent**: Automated evidence validation and verification
-- **📚 Active Learning Agent**: Continuous model improvement through feedback loops
+- **🇪🇺 EU Digital Services Act (DSA)** - Content moderation, transparency, algorithmic controls
+- **🇪🇺 EU General Data Protection Regulation (GDPR)** - Privacy rights, data protection
+- **🇺🇸 Florida HB 3** - Minor protections, addictive feature restrictions, parental controls
+- **🇺🇸 California SB 976** - Social media platform obligations for children
+- **🇺🇸 COPPA** - Children's online privacy protection
+- **🇺🇸 NCMEC Reporting** - Child safety abuse material detection and reporting
 
-The system processes compliance requirements across **EU**, **California**, **Florida**, and **Federal US** jurisdictions with sub-second response times and high accuracy validation.
+## 🏗️ Repository Structure
+
+### 📚 **Documentation** (`/docs/`)
+Comprehensive implementation guides and regulatory analysis
+- **Regulatory Frameworks** - Detailed compliance guides for each jurisdiction
+- **Implementation Guides** - Step-by-step technical implementation
+- **Checklists** - Designer, PM, and legal review checklists
+- **Risk Assessments** - Feature risk matrices and enforcement analysis
+
+### ⚙️ **Configuration** (`/config/`)
+Jurisdiction-specific compliance rules and requirements
+- **Jurisdictions** - YAML configs for each regulatory framework
+- **Age Thresholds** - Configurable limits for different jurisdictions
+- **Notification Curfews** - Time-based restrictions per region
+- **Retention Periods** - Data lifecycle management by regulation
+
+### 💻 **Source Code** (`/src/`)
+Modular compliance components ready for integration
+- **Age Verification** - Document processing, biometric analysis, fraud detection
+- **Parental Controls** - Account oversight, time limits, activity monitoring
+- **Content Moderation** - CSAM detection, illegal content, transparency reporting
+- **Algorithmic Controls** - Feed transparency, user controls, non-profiling options
+- **Data Portability** - GDPR Article 20, DMA compliance tools
+- **Audit Logging** - Evidence collection, retention management
+
+### 🧪 **Testing Framework** (`/tests/`)
+Comprehensive compliance validation and testing
+- **Integration Tests** - End-to-end compliance validation
+- **Acceptance Tests** - Regulatory requirement verification
+- **Performance Tests** - System scalability under compliance load
+- **Security Tests** - Penetration testing for compliance systems
+
+### 🚀 **Deployment** (`/deployment/`)
+Production-ready infrastructure and deployment configs
+- **Docker Containers** - Portable compliance service deployment
+- **Kubernetes Manifests** - Scalable compliance infrastructure
+- **Terraform Templates** - Cloud infrastructure as code
+
+### 📊 **Monitoring** (`/monitoring/`)
+Real-time compliance tracking and alerting
+- **Dashboards** - Compliance health monitoring
+- **Alerts** - Automated violation detection
+- **Metrics** - KPI tracking and reporting
+
+### ⚖️ **Legal Documentation** (`/legal/`)
+Policy templates and regulatory filings
+- **Privacy Policies** - Jurisdiction-specific templates
+- **Terms of Service** - Compliance-integrated legal terms
+- **Regulatory Filings** - DSA risk assessments, transparency reports
+
+### 🤖 **Automation** (`/.github/`)
+Continuous compliance validation and monitoring
+- **GitHub Actions** - Automated compliance testing
+- **Issue Templates** - Standardized compliance gap reporting
+- **PR Templates** - Regulatory review checkpoints
+
+## 🚀 Quick Start
+
+### 1. Clone and Setup
+```bash
+git clone https://github.com/your-org/social-media-compliance-framework.git
+cd social-media-compliance-framework
+pip install -r requirements.txt
+```
+
+### 2. Configure Your Jurisdiction
+```bash
+# Copy and customize configuration for your jurisdiction
+cp config/jurisdictions/eu-dsa.yaml config/jurisdictions/your-platform.yaml
+```
+
+### 3. Run Compliance Tests
+```bash
+# Test all compliance modules
+pytest tests/ -v
+
+# Test specific jurisdiction
+pytest tests/acceptance/ -k "florida" -v
+```
+
+### 4. Deploy Compliance Services
+```bash
+# Deploy with Docker
+docker-compose up -d compliance-services
+
+# Or deploy to Kubernetes
+kubectl apply -f deployment/kubernetes/
+```
+
+## 🎯 Key Features
+
+### 🔄 **Continuous Compliance**
+GitHub Actions automatically validate regulatory requirements on every code change, ensuring ongoing compliance with evolving regulations.
+
+### 🌍 **Multi-Jurisdictional Support**
+Configurable system supporting EU, US Federal, and state-specific requirements simultaneously with intelligent jurisdiction detection.
+
+### 📊 **Evidence Collection**
+Built-in audit logging with jurisdiction-appropriate retention periods for regulatory reporting and enforcement response.
+
+### 🧪 **Acceptance Testing**
+Automated tests verify compliance with specific regulatory clauses, providing legal teams with technical compliance evidence.
+
+### 📚 **Documentation-First**
+Comprehensive guides linking technical implementation to legal requirements, enabling cross-functional compliance understanding.
+
+### 🚀 **Production-Ready**
+Docker/Kubernetes deployment with monitoring and alerting, ready for enterprise-scale social media platforms.
+
+## 📋 Implementation Checklist
+
+### 🏗️ **Foundation** (Weeks 1-2)
+- [ ] Deploy jurisdiction detection system
+- [ ] Configure compliance rules for target markets
+- [ ] Implement audit logging infrastructure
+- [ ] Set up compliance monitoring dashboards
+
+### 👶 **Child Protection** (Weeks 3-6)
+- [ ] Deploy age verification systems
+- [ ] Implement parental control mechanisms
+- [ ] Configure addictive feature restrictions
+- [ ] Set up notification curfew enforcement
+
+### 🔍 **Content Safety** (Weeks 7-10)
+- [ ] Deploy CSAM detection and reporting
+- [ ] Implement content moderation workflows
+- [ ] Set up transparency reporting automation
+- [ ] Configure human review processes
+
+### 🤖 **Algorithmic Transparency** (Weeks 11-12)
+- [ ] Implement recommendation transparency
+- [ ] Deploy user control mechanisms
+- [ ] Configure non-profiling options
+- [ ] Set up algorithm explanation interfaces
+
+### 📊 **Data Protection** (Weeks 13-14)
+- [ ] Implement GDPR data subject rights
+- [ ] Deploy data portability systems
+- [ ] Configure retention period automation
+- [ ] Set up privacy preference centers
+
+### ✅ **Final Validation** (Weeks 15-16)
+- [ ] Complete end-to-end compliance testing
+- [ ] Conduct third-party compliance audit
+- [ ] Finalize regulatory filing documentation
+- [ ] Deploy production compliance monitoring
+
+## 🏛️ Regulatory Coverage
+
+### 🇪🇺 **European Union**
+- **Digital Services Act (DSA)** - Full VLOP compliance for platforms 45M+ users
+- **General Data Protection Regulation (GDPR)** - Complete data protection implementation
+- **Digital Markets Act (DMA)** - Gatekeeper obligation framework
+- **ePrivacy Regulation** - Cookie consent and electronic communications
+
+### 🇺🇸 **United States Federal**
+- **Children's Online Privacy Protection Act (COPPA)** - Under-13 privacy protections
+- **18 U.S.C. §2258A** - CSAM detection and NCMEC reporting requirements
+- **Section 230** - Content moderation best practices
+- **Americans with Disabilities Act (ADA)** - Accessibility compliance
+
+### 🇺🇸 **US State Regulations**
+- **Florida HB 3** - Minor protection and addictive feature restrictions
+- **California SB 976** - Social media platform obligations for children
+- **Utah Social Media Regulation Act** - Age verification and parental controls
+- **Texas HB 18** - Age verification for adult content platforms
+
+## 🤝 Contributing
+
+We welcome contributions from legal experts, engineers, and compliance professionals:
+
+### 📝 **Documentation Contributions**
+- Regulatory analysis and interpretation
+- Implementation best practices
+- Compliance testing scenarios
+- Legal precedent analysis
+
+### 💻 **Code Contributions**
+- Compliance module implementations
+- Testing framework enhancements
+- Performance optimizations
+- Security improvements
+
+### 🧪 **Testing Contributions**
+- New compliance test scenarios
+- Performance benchmarking
+- Security penetration testing
+- Cross-jurisdiction validation
+
+### 📊 **Monitoring Contributions**
+- Compliance dashboard improvements
+- Alert system enhancements
+- Metric collection optimization
+- Reporting automation
+
+## 🎯 Key Features from TikTok TechJam Implementation
+
+This framework evolved from the **TikTok TechJam 2024: Geo-Compliance Classifier** project, which addresses the critical challenge of ensuring social media platforms comply with diverse geographical regulations while maintaining user safety and platform integrity.
+
+The Geo-Compliance Classifier is an intelligent system that:
 
 ## 🏗️ System Architecture
 

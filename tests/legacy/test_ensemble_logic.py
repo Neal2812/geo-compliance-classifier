@@ -6,7 +6,7 @@ This script shows how the Confidence Validator Agent handles different scenarios
 and demonstrates the ensemble decision-making process.
 """
 
-from src.confidence_validator import ConfidenceValidatorAgent
+from core.agents.confidence_validator import ConfidenceValidatorAgent
 import os
 
 

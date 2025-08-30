@@ -6,7 +6,7 @@ This script demonstrates successful evidence verification cases and shows
 how the system handles different types of evidence and reasoning.
 """
 
-from src.evidence_verifier import EvidenceVerificationAgent
+from core.agents.evidence_verifier import EvidenceVerificationAgent
 
 
 def test_strong_alignment_case():
