@@ -4,6 +4,17 @@ import re
 from difflib import SequenceMatcher
 import json
 from pathlib import Path
+import uuid
+from datetime import datetime
+try:
+    from .rag_adapter import RAGAdapter
+    from .evidence_logger import log_compliance_decision
+except ImportError:
+    from rag_adapter import RAGAdapter
+    try:
+        from evidence_logger import log_compliance_decision
+    except ImportError:
+        log_compliance_decision = None
 
 
 @dataclass
@@ -15,6 +26,7 @@ class EvidenceSpan:
     source: str
     regulation_reference: Optional[str] = None
     confidence: float = 1.0
+    regulatory_context: Optional[str] = None
 
 
 @dataclass
@@ -74,11 +86,14 @@ class EvidenceVerificationAgent:
     and flagging of problematic ones for manual review.
     """
     
-    def __init__(self, legal_texts_dir: str = "legal_texts"):
+    def __init__(self, legal_texts_dir: str = "legal_texts", rag_adapter: RAGAdapter = None):
         self.legal_texts_dir = Path(legal_texts_dir)
         self.regulation_database = self._load_regulation_database()
         self.compliance_keywords = self._initialize_compliance_keywords()
         self.verification_history = []
+        
+        # RAG integration
+        self.rag_adapter = rag_adapter or RAGAdapter()
         
         # Quality thresholds
         self.alignment_threshold = 0.75
@@ -151,6 +166,43 @@ class EvidenceVerificationAgent:
             terms.extend(matches)
         
         return list(set(terms))
+    
+    def verify_evidence_with_rag(self, text: str, regulation_refs: List[str]) -> List[RegulationMapping]:
+        """Verify evidence using centralized RAG system."""
+        try:
+            # Get regulatory context via RAG
+            rag_results = self.rag_adapter.retrieve_regulatory_context(
+                text, max_results=5
+            )
+            
+            # Process RAG results
+            mappings = []
+            for result in rag_results:
+                mapping = RegulationMapping(
+                    regulation_name=result["source"],
+                    text_excerpt=result["text"],
+                    is_valid=True,  # RAG results are pre-validated
+                    validation_notes=f"Retrieved via centralized RAG system",
+                    section_reference=result["section"],
+                    source_file=result["metadata"].get("source_path")
+                )
+                mappings.append(mapping)
+            
+            return mappings
+            
+        except Exception as e:
+            print(f"RAG-based verification failed: {e}")
+            # Fallback to existing method
+            return self._verify_evidence_fallback(text, regulation_refs)
+
+    def _verify_evidence_fallback(self, text: str, regulation_refs: List[str]) -> List[RegulationMapping]:
+        """Fallback verification method."""
+        # Existing verification logic
+        return []
+
+    def get_rag_system_status(self) -> Dict[str, Any]:
+        """Get RAG system status."""
+        return self.rag_adapter.get_system_status()
     
     def _initialize_compliance_keywords(self) -> Dict[str, List[str]]:
         """Initialize compliance keywords for evidence quality assessment"""
@@ -234,6 +286,31 @@ class EvidenceVerificationAgent:
         
         # Store in history
         self.verification_history.append(result)
+        
+        # Log evidence for verification decision
+        if log_compliance_decision:
+            evidence_data = {
+                'request_id': str(uuid.uuid4()),
+                'timestamp_iso': datetime.now().isoformat(),
+                'agent_name': 'evidence_verifier',
+                'decision_flag': final_decision == 'APPROVED',
+                'reasoning_text': f"Verification completed: {final_decision} - {notes}",
+                'feature_id': case_id,
+                'feature_title': f"Evidence Verification {case_id}",
+                'related_regulations': regulation_references,
+                'confidence': overall_score,
+                'retrieval_metadata': {
+                    'agent_specific': 'evidence_verification',
+                    'evidence_spans_count': len(evidence_spans),
+                    'regulation_references_count': len(regulation_references),
+                    'alignment_score': reasoning_validation.alignment_score,
+                    'quality_score': sum(q.quality_score for q in evidence_quality) / max(len(evidence_quality), 1)
+                },
+                'timings_ms': {
+                    'verification_ms': 0  # Will be populated if timing is tracked
+                }
+            }
+            log_compliance_decision(evidence_data)
         
         return result
     

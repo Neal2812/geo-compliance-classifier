@@ -10,8 +10,24 @@ from dataclasses import dataclass
 from datetime import datetime
 import json
 import logging
+import sys
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+# Add RAG adapter import
+try:
+    sys.path.append(str(Path(__file__).parent.parent.parent))
+    from src.rag_adapter import RAGAdapter
+    from src.evidence_logger import log_compliance_decision
+    import uuid
+    from datetime import datetime
+except ImportError:
+    RAGAdapter = None
+    log_compliance_decision = None
+    uuid = None
+    datetime = None
+    logger.warning("RAG adapter not available, using fallback knowledge base")
 
 @dataclass
 class ComplianceMatch:
@@ -234,6 +250,7 @@ class ComplianceAnalyzer:
     def __init__(self, knowledge_base: Optional[ComplianceKnowledgeBase] = None):
         self.kb = knowledge_base or ComplianceKnowledgeBase()
         self.analysis_cache = {}
+        self.rag_adapter = RAGAdapter() if RAGAdapter else None
         
     def analyze_feature(self, feature_name: str, feature_description: str) -> FeatureAnalysis:
         """
@@ -265,6 +282,9 @@ class ComplianceAnalyzer:
         
         # Generate recommendations
         recommendations = self._generate_recommendations(feature_description, matches, missing_coverage)
+        
+        # Log analysis evidence
+        self._log_analysis_evidence(feature_name, matches, overall_compliance)
         
         # Determine if flagged for review
         flagged_for_review = self._should_flag_for_review(matches, confidence_level, missing_coverage)
@@ -616,3 +636,52 @@ class ComplianceAnalyzer:
             "missing_coverage_analysis": missing_coverage_counts,
             "compliant_percentage": round((status_counts.get("COMPLIANT", 0) / total_features) * 100, 1) if total_features > 0 else 0
         }
+    
+    def _get_rag_regulatory_context(self, query: str, jurisdiction: str = None) -> List[Dict]:
+        """Get regulatory context using centralized RAG system."""
+        if not self.rag_adapter:
+            return []
+        
+        try:
+            return self.rag_adapter.retrieve_regulatory_context(
+                query=query,
+                jurisdiction=jurisdiction,
+                max_results=5
+            )
+        except Exception as e:
+            logger.warning(f"RAG retrieval failed: {e}")
+            return []
+    
+    def _log_analysis_evidence(self, feature_name: str, matches: List[ComplianceMatch], 
+                              overall_compliance: str):
+        """Log compliance analysis evidence using centralized logger."""
+        if log_compliance_decision:
+            evidence_data = {
+                'request_id': str(uuid.uuid4()),
+                'timestamp_iso': datetime.now().isoformat(),
+                'agent_name': 'compliance_analyzer',
+                'decision_flag': overall_compliance == 'Compliant',
+                'reasoning_text': f"Analysis completed with {len(matches)} compliance matches",
+                'feature_id': feature_name,
+                'feature_title': feature_name,
+                'related_regulations': [match.regulation for match in matches],
+                'confidence': sum(match.confidence for match in matches) / max(len(matches), 1),
+                'retrieval_metadata': {
+                    'agent_specific': 'compliance_analysis',
+                    'analysis_top_k': 5,
+                    'matches_count': len(matches)
+                },
+                'timings_ms': {
+                    'analysis_ms': 0  # Will be populated if timing is tracked
+                }
+            }
+            log_compliance_decision(evidence_data)
+        else:
+            # Fallback to local logging
+            evidence = {
+                'feature_name': feature_name,
+                'overall_compliance': overall_compliance,
+                'matches_count': len(matches),
+                'timestamp': datetime.now().isoformat()
+            }
+            logger.info(f"Compliance analysis evidence logged (local): {evidence}")

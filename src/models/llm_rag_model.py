@@ -2,6 +2,12 @@ import openai
 from typing import Dict, Tuple, Any, List
 import json
 import os
+import sys
+from pathlib import Path
+
+# Add parent directory to path for RAG adapter
+sys.path.append(str(Path(__file__).parent.parent))
+from rag_adapter import RAGAdapter
 
 
 class LLMRAGModel:
@@ -11,74 +17,31 @@ class LLMRAGModel:
     Strength: Handles novel or edge-case scenarios
     """
     
-    def __init__(self, api_key: str = None, model: str = "gpt-4"):
+    def __init__(self, api_key: str = None, model: str = "gpt-4", rag_adapter: RAGAdapter = None):
         self.model = model
         self.api_key = api_key or os.getenv("OPENAI_API_KEY")
-        self.regulatory_database = self._initialize_regulatory_database()
+        
+        # Use centralized RAG instead of mock database
+        self.rag_adapter = rag_adapter or RAGAdapter()
         
         if self.api_key:
             openai.api_key = self.api_key
     
-    def _initialize_regulatory_database(self) -> Dict[str, Any]:
-        """Initialize a basic regulatory database for RAG"""
-        return {
-            "general_compliance": {
-                "description": "General compliance principles and standards",
-                "keywords": ["compliance", "regulation", "standard", "requirement"],
-                "examples": [
-                    "Organizations must comply with applicable laws and regulations",
-                    "Regular audits ensure ongoing compliance",
-                    "Documentation must be maintained for compliance purposes"
-                ]
-            },
-            "data_protection": {
-                "description": "Data protection and privacy regulations",
-                "keywords": ["privacy", "data protection", "GDPR", "personal data"],
-                "examples": [
-                    "Personal data must be processed lawfully and transparently",
-                    "Data subjects have rights to access and control their data",
-                    "Data breaches must be reported within 72 hours"
-                ]
-            },
-            "financial_regulations": {
-                "description": "Financial and banking regulations",
-                "keywords": ["financial", "banking", "SEC", "audit", "reporting"],
-                "examples": [
-                    "Financial institutions must maintain adequate capital reserves",
-                    "Regular financial reporting is required for compliance",
-                    "Anti-money laundering procedures must be implemented"
-                ]
-            },
-            "environmental_compliance": {
-                "description": "Environmental and safety regulations",
-                "keywords": ["environmental", "safety", "EPA", "hazardous", "waste"],
-                "examples": [
-                    "Environmental impact assessments are required for new projects",
-                    "Hazardous waste must be properly disposed of",
-                    "Safety protocols must be followed in all operations"
-                ]
-            }
-        }
+    # Removed mock regulatory database - now using centralized RAG
     
     def _retrieve_relevant_context(self, text: str) -> List[str]:
         """Retrieve relevant regulatory context for the input text"""
-        relevant_contexts = []
-        text_lower = text.lower()
-        
-        for category, info in self.regulatory_database.items():
-            # Check if any keywords match
-            if any(keyword in text_lower for keyword in info["keywords"]):
-                relevant_contexts.extend(info["examples"])
-        
-        # If no specific context found, return general compliance principles
-        if not relevant_contexts:
-            relevant_contexts = [
+        try:
+            # Use centralized RAG system
+            results = self.rag_adapter.retrieve_regulatory_context(text, max_results=3)
+            return [r["text"] for r in results]
+        except Exception as e:
+            print(f"RAG retrieval failed: {e}")
+            # Fallback to basic compliance principles
+            return [
                 "Compliance requires adherence to applicable laws and regulations",
-                "Organizations must establish and maintain compliance programs",
-                "Regular monitoring and assessment is essential for ongoing compliance"
+                "Organizations must establish and maintain compliance programs"
             ]
-        
-        return relevant_contexts[:3]  # Limit to top 3 most relevant
     
     def predict(self, text: str) -> Tuple[str, float]:
         """
@@ -204,14 +167,18 @@ Response:"""
         else:
             return "Unclear", 0.60
     
+    def get_rag_system_status(self) -> Dict[str, Any]:
+        """Get RAG system status."""
+        return self.rag_adapter.get_system_status()
+    
     def get_model_info(self) -> Dict[str, Any]:
         """Get model information and status"""
         return {
             "model_type": "General-Purpose LLM with RAG",
             "model": self.model,
             "status": "active" if self.api_key else "fallback",
-            "rag_database_size": len(self.regulatory_database),
-            "strength": "Handles novel or edge-case scenarios"
+            "rag_database_size": "centralized",  # Now using centralized RAG
+            "strength": "Handles novel or edge-case scenarios with centralized RAG"
         }
     
     def explain_decision(self, text: str) -> Dict[str, Any]:

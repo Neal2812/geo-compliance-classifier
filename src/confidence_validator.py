@@ -1,6 +1,15 @@
 from typing import Dict, List, Tuple, Any
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from src.models import LegalBERTModel, RulesBasedClassifier, LLMRAGModel
+try:
+    from .rag_adapter import RAGAdapter
+    from .evidence_logger import log_compliance_decision
+except ImportError:
+    from rag_adapter import RAGAdapter
+    try:
+        from evidence_logger import log_compliance_decision
+    except ImportError:
+        log_compliance_decision = None
 import pandas as pd
 from datetime import datetime
 import uuid
@@ -14,6 +23,7 @@ class ModelPrediction:
     confidence: float
     reasoning: str = ""
     model_info: Dict[str, Any] = None
+    regulatory_context: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -42,7 +52,7 @@ class ConfidenceValidatorAgent:
     3. General-Purpose LLM with RAG (Context-Enhanced)
     """
     
-    def __init__(self, openai_api_key: str = None):
+    def __init__(self, openai_api_key: str = None, rag_adapter: RAGAdapter = None):
         self.models = {
             "Legal-BERT": LegalBERTModel(),
             "Rules-Based": RulesBasedClassifier(),
@@ -51,6 +61,9 @@ class ConfidenceValidatorAgent:
         self.validation_history = []
         self.confidence_threshold = 0.85
         self.auto_approval_threshold = 0.85
+        
+        # RAG integration
+        self.rag_adapter = rag_adapter or RAGAdapter()
     
     def validate_case(self, text: str, case_id: str = None) -> ValidationResult:
         """
@@ -116,7 +129,49 @@ class ConfidenceValidatorAgent:
         # Store in history
         self.validation_history.append(result)
         
+        # Log evidence for confidence validation decision
+        if log_compliance_decision:
+            evidence_data = {
+                'request_id': str(uuid.uuid4()),
+                'timestamp_iso': datetime.now().isoformat(),
+                'agent_name': 'confidence_validator',
+                'decision_flag': ensemble_decision != 'Non-Compliant',
+                'reasoning_text': f"Confidence validation: {ensemble_decision} - {notes}",
+                'feature_id': case_id,
+                'feature_title': f"Confidence Validation {case_id}",
+                'related_regulations': [],  # Will be populated from RAG if available
+                'confidence': ensemble_confidence,
+                'retrieval_metadata': {
+                    'agent_specific': 'confidence_validation',
+                    'models_count': len(predictions),
+                    'agreement_level': self._get_agreement_level(predictions),
+                    'majority_vote': self._get_majority_vote(predictions),
+                    'auto_approved': auto_approved
+                },
+                'timings_ms': {
+                    'validation_ms': 0  # Will be populated if timing is tracked
+                }
+            }
+            log_compliance_decision(evidence_data)
+        
         return result
+    
+    def validate_case_with_rag(self, text: str, case_id: str = None) -> ValidationResult:
+        """Validate case with enhanced RAG context."""
+        # Get regulatory context via RAG
+        regulatory_context = self.rag_adapter.retrieve_regulatory_context(text, max_results=3)
+        
+        # Enhance text with regulatory context
+        enhanced_text = f"{text}\n\nRegulatory Context:\n" + "\n".join([
+            f"- {ctx['text']}" for ctx in regulatory_context
+        ])
+        
+        # Use enhanced text for validation
+        return self.validate_case(enhanced_text, case_id)
+
+    def get_rag_system_status(self) -> Dict[str, Any]:
+        """Get RAG system status."""
+        return self.rag_adapter.get_system_status()
     
     def _get_model_reasoning(self, model: Any, text: str) -> str:
         """Get reasoning from model if available"""

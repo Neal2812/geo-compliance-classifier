@@ -8,6 +8,16 @@ from sklearn.cluster import KMeans
 from sklearn.feature_extraction.text import TfidfVectorizer
 import re
 from pathlib import Path
+import uuid
+try:
+    from .rag_adapter import RAGAdapter
+    from .evidence_logger import log_compliance_decision
+except ImportError:
+    from rag_adapter import RAGAdapter
+    try:
+        from evidence_logger import log_compliance_decision
+    except ImportError:
+        log_compliance_decision = None
 
 
 @dataclass
@@ -23,6 +33,7 @@ class HumanCorrection:
     model_used: str
     correction_type: str = "label_correction"
     impact_score: float = 0.0
+    regulatory_context: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -56,7 +67,7 @@ class WeeklyMetrics:
 class ActiveLearningAgent:
     """Active Learning Agent for reducing human review effort"""
     
-    def __init__(self, data_dir: str = "active_learning_data"):
+    def __init__(self, data_dir: str = "active_learning_data", rag_adapter: RAGAdapter = None):
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(exist_ok=True)
         
@@ -70,12 +81,28 @@ class ActiveLearningAgent:
         self.target_reduction_rate = 0.15
         self.pattern_analysis_threshold = 10
         
+        # RAG integration
+        self.rag_adapter = rag_adapter or RAGAdapter()
+        
         # Load existing data
         self._load_data()
         
         # Analytics components
         self.vectorizer = TfidfVectorizer(max_features=1000, stop_words='english')
         self.pattern_clustering = KMeans(n_clusters=5, random_state=42)
+    
+    def get_regulatory_context(self, text: str, max_results: int = 3) -> List[str]:
+        """Get regulatory context using centralized RAG system."""
+        try:
+            results = self.rag_adapter.retrieve_regulatory_context(text, max_results=max_results)
+            return [r["text"] for r in results]
+        except Exception as e:
+            print(f"Failed to get regulatory context: {e}")
+            return []
+
+    def get_rag_system_status(self) -> Dict[str, Any]:
+        """Get RAG system status."""
+        return self.rag_adapter.get_system_status()
     
     def _load_data(self):
         """Load existing data from storage"""
@@ -163,6 +190,33 @@ class ActiveLearningAgent:
         # Check if retraining should be triggered
         if len(self.corrections) >= self.correction_threshold:
             self._trigger_retraining()
+        
+        # Log evidence for active learning decision
+        if log_compliance_decision:
+            evidence_data = {
+                'request_id': str(uuid.uuid4()),
+                'timestamp_iso': datetime.now().isoformat(),
+                'agent_name': 'active_learning_agent',
+                'decision_flag': corrected_label != 'Non-Compliant',
+                'reasoning_text': f"Human correction logged: {original_prediction} → {corrected_label} - {reviewer_reasoning}",
+                'feature_id': case_id,
+                'feature_title': f"Active Learning Correction {case_id}",
+                'related_regulations': [],  # Will be populated from RAG if available
+                'confidence': confidence_score,
+                'retrieval_metadata': {
+                    'agent_specific': 'active_learning',
+                    'correction_type': correction_type,
+                    'impact_score': impact_score,
+                    'model_used': model_used,
+                    'corrections_count': len(self.corrections),
+                    'pattern_analysis_triggered': len(self.corrections) >= self.pattern_analysis_threshold,
+                    'retraining_triggered': len(self.corrections) >= self.correction_threshold
+                },
+                'timings_ms': {
+                    'correction_logging_ms': 0  # Will be populated if timing is tracked
+                }
+            }
+            log_compliance_decision(evidence_data)
         
         return case_id
     

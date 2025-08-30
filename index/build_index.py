@@ -7,6 +7,7 @@ import time
 from pathlib import Path
 from typing import List, Dict, Any, Tuple
 import numpy as np
+import json
 
 try:
     import faiss
@@ -119,7 +120,7 @@ class VectorIndexBuilder:
         
         try:
             # Load FAISS index
-            faiss_path = index_path / "faiss_index.bin"
+            faiss_path = index_path / "faiss" / "index.faiss"
             if faiss_path.exists():
                 self.index = faiss.read_index(str(faiss_path))
             else:
@@ -127,10 +128,28 @@ class VectorIndexBuilder:
                 return False
             
             # Load metadata
-            metadata_path = index_path / "chunks_metadata.pkl"
+            metadata_path = index_path / "faiss" / "id_map.jsonl"
             if metadata_path.exists():
-                with open(metadata_path, 'rb') as f:
-                    self.chunks_metadata = pickle.load(f)
+                self.chunks_metadata = []
+                with open(metadata_path, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        meta = json.loads(line)
+                        # Create TextChunk with proper field mapping
+                        chunk = TextChunk(
+                            chunk_id=meta.get('id', str(meta.get('row', 0))),
+                            law_id=meta.get('law_id', 'Unknown'),
+                            law_name=meta.get('law_name', 'Unknown'),
+                            jurisdiction=meta.get('jurisdiction', 'Unknown'),
+                            section_label=meta.get('section_label', ''),
+                            section_path=meta.get('section_label', ''),
+                            content=meta.get('text', ''),
+                            start_line=meta.get('meta', {}).get('start_line', 0),
+                            end_line=meta.get('meta', {}).get('end_line', 0),
+                            source_path=meta.get('source_path', ''),
+                            char_start=meta.get('meta', {}).get('start_char', 0),
+                            char_end=meta.get('meta', {}).get('end_char', 0)
+                        )
+                        self.chunks_metadata.append(chunk)
             else:
                 logger.error("Metadata file not found")
                 return False
@@ -160,18 +179,29 @@ class VectorIndexBuilder:
         # Extract text content
         texts = [chunk.content for chunk in chunks]
         
-        # Generate embeddings in batches for memory efficiency
-        batch_size = 32
+        # Generate embeddings in smaller batches for memory efficiency
+        batch_size = 8  # Reduced from 32 to avoid memory issues
         embeddings = []
         
-        for i in range(0, len(texts), batch_size):
-            batch_texts = texts[i:i + batch_size]
-            batch_embeddings = self.model.encode(
-                batch_texts,
-                convert_to_numpy=True,
-                show_progress_bar=True
-            )
-            embeddings.append(batch_embeddings)
+        try:
+            for i in range(0, len(texts), batch_size):
+                batch_texts = texts[i:i + batch_size]
+                logger.info(f"Processing batch {i//batch_size + 1}/{(len(texts) + batch_size - 1)//batch_size}")
+                
+                batch_embeddings = self.model.encode(
+                    batch_texts,
+                    convert_to_numpy=True,
+                    show_progress_bar=False  # Disable progress bar to reduce output
+                )
+                embeddings.append(batch_embeddings)
+                
+                # Force garbage collection after each batch
+                import gc
+                gc.collect()
+                
+        except Exception as e:
+            logger.error(f"Error generating embeddings: {e}")
+            raise
         
         embeddings_array = np.vstack(embeddings)
         logger.info(f"Generated embeddings shape: {embeddings_array.shape}")
@@ -199,13 +229,39 @@ class VectorIndexBuilder:
         """Save index and metadata to disk."""
         logger.info(f"Saving index to {index_path}")
         
+        # Create FAISS subdirectory
+        faiss_dir = index_path / "faiss"
+        faiss_dir.mkdir(exist_ok=True)
+        
         # Save FAISS index
-        faiss_path = index_path / "faiss_index.bin"
+        faiss_path = faiss_dir / "index.faiss"
         faiss.write_index(self.index, str(faiss_path))
         
-        # Save metadata
+        # Save metadata as JSONL for easier access
+        id_map_path = faiss_dir / "id_map.jsonl"
+        with open(id_map_path, 'w', encoding='utf-8') as f:
+            for i, chunk in enumerate(self.chunks_metadata):
+                meta = {
+                    'row': i,
+                    'id': chunk.chunk_id,
+                    'text': chunk.content,
+                    'law_id': chunk.law_id,
+                    'law_name': chunk.law_name,
+                    'section_label': chunk.section_label,
+                    'jurisdiction': chunk.jurisdiction,
+                    'source_path': chunk.source_path,
+                    'meta': {
+                        'start_char': chunk.char_start,
+                        'end_char': chunk.char_end,
+                        'start_line': chunk.start_line,
+                        'end_line': chunk.end_line
+                    }
+                }
+                f.write(json.dumps(meta) + '\n')
+        
+        # Also save legacy pickle format for backward compatibility
         metadata_path = index_path / "chunks_metadata.pkl"
-        with open(metadata_path, 'wb') as f:
+        with open(metadata_path, 'rb') as f:
             pickle.dump(self.chunks_metadata, f)
         
         # Save configuration
@@ -259,15 +315,27 @@ class VectorIndexBuilder:
 def main():
     """Main function to build the vector index."""
     logging.basicConfig(level=logging.INFO)
+    import argparse
     
-    builder = VectorIndexBuilder()
+    parser = argparse.ArgumentParser(description="Build FAISS vector index")
+    parser.add_argument("--rebuild", action="store_true", help="Rebuild index even if exists")
+    parser.add_argument("--config", default="config.yaml", help="Config file path")
+    args = parser.parse_args()
+    
+    builder = VectorIndexBuilder(args.config)
+    
+    # Check if index exists
+    if not args.rebuild and Path("index/faiss/index.faiss").exists():
+        print("Index already exists. Use --rebuild to overwrite.")
+        return
+    
     stats = builder.build_index()
     
     print(f"Index built successfully!")
     print(f"Total chunks: {stats.total_chunks}")
-    print(f"Total laws: {stats.total_laws}")
+    print(f"Total documents: {stats.total_documents}")
     print(f"Build time: {stats.build_time_seconds:.2f}s")
-    print(f"Index saved to: {stats.index_path}")
+    print(f"Index saved to: index/faiss/")
     
     return stats
 

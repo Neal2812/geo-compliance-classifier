@@ -16,10 +16,22 @@ from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass, asdict
 from collections import Counter, defaultdict
 import logging
+import sys
+from pathlib import Path
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+# Add RAG adapter import
+try:
+    sys.path.append(str(Path(__file__).parent.parent.parent))
+    from src.rag_adapter import RAGAdapter
+    from src.evidence_logger import log_compliance_decision
+except ImportError:
+    RAGAdapter = None
+    log_compliance_decision = None
+    logger.warning("RAG adapter not available, using fallback compliance rules")
 
 @dataclass
 class GeneratedFeature:
@@ -537,6 +549,7 @@ class TikTokFeatureGenerator:
     def __init__(self, seed: int = 42):
         random.seed(seed)
         self.seed = seed
+        self.rag_adapter = RAGAdapter() if RAGAdapter else None
         self.template_library = FeatureTemplateLibrary()
         self.compliance_engine = ComplianceRuleEngine()
         self.generated_features = []
@@ -701,10 +714,17 @@ class TikTokFeatureGenerator:
         # Add target-specific adjustments
         feature_data = self._adjust_for_target_label(feature_data, target_label)
         
-        # Evaluate compliance
-        label, rationale, implicated_regs = self.compliance_engine.evaluate_compliance(
-            feature_data, geo_info['country'], geo_info.get('state')
-        )
+        # Evaluate compliance using RAG if available, otherwise fallback
+        if self.rag_adapter:
+            compliance_result = self._validate_compliance_with_rag(feature_data)
+            self._log_compliance_evidence(feature_data, compliance_result)
+            label = compliance_result['label']
+            rationale = compliance_result['rationale']
+            implicated_regs = compliance_result['implicated_regs']
+        else:
+            label, rationale, implicated_regs = self.compliance_engine.evaluate_compliance(
+                feature_data, geo_info['country'], geo_info.get('state')
+            )
         
         # Generate risk tags
         risk_tags = self._generate_risk_tags(feature_data, mutated_template)
@@ -927,6 +947,120 @@ Generation Seed: {self.seed}
         
         logger.info(f"Distribution report saved to {report_path}")
         return report_path
+    
+    def _validate_compliance_with_rag(self, feature_data: Dict) -> Dict:
+        """Validate compliance using centralized RAG system."""
+        try:
+            # Query RAG for regulatory context
+            query = f"{feature_data.get('title', '')} {feature_data.get('description', '')}"
+            regulatory_context = self.rag_adapter.retrieve_regulatory_context(
+                query=query,
+                max_results=3
+            )
+            
+            # Analyze compliance based on RAG results
+            compliance_status = self._analyze_rag_compliance(regulatory_context, feature_data)
+            
+            return {
+                'label': compliance_status['label'],
+                'rationale': compliance_status['rationale'],
+                'implicated_regs': compliance_status['regulations'],
+                'confidence_score': compliance_status['confidence']
+            }
+        except Exception as e:
+            logger.warning(f"RAG compliance validation failed: {e}, using fallback")
+            return self._validate_compliance_fallback(feature_data)
+    
+    def _analyze_rag_compliance(self, regulatory_context: List[Dict], feature_data: Dict) -> Dict:
+        """Analyze compliance based on RAG-retrieved regulatory context."""
+        # Simple compliance analysis based on RAG results
+        if not regulatory_context:
+            return {
+                'label': 'Unknown',
+                'rationale': 'No regulatory context available',
+                'regulations': [],
+                'confidence': 0.5
+            }
+        
+        # Count compliance indicators
+        compliance_indicators = 0
+        risk_indicators = 0
+        regulations = []
+        
+        for context in regulatory_context:
+            regulations.append(context.get('regulation', 'Unknown'))
+            text = context.get('text', '').lower()
+            
+            # Check for compliance indicators
+            if any(term in text for term in ['compliance', 'compliant', 'permitted', 'allowed']):
+                compliance_indicators += 1
+            if any(term in text for term in ['violation', 'prohibited', 'restricted', 'banned']):
+                risk_indicators += 1
+        
+        # Determine compliance label
+        if compliance_indicators > risk_indicators:
+            label = 'Compliant'
+            rationale = f'Regulatory context indicates compliance with {", ".join(regulations[:2])}'
+        elif risk_indicators > compliance_indicators:
+            label = 'Non-Compliant'
+            rationale = f'Regulatory context indicates potential violations of {", ".join(regulations[:2])}'
+        else:
+            label = 'Partially Compliant'
+            rationale = f'Mixed regulatory signals for {", ".join(regulations[:2])}'
+        
+        confidence = min(0.9, 0.5 + (len(regulatory_context) * 0.1))
+        
+        return {
+            'label': label,
+            'rationale': rationale,
+            'regulations': regulations,
+            'confidence': confidence
+        }
+    
+    def _validate_compliance_fallback(self, feature_data: Dict) -> Dict:
+        """Fallback compliance validation using existing rule engine."""
+        label, rationale, implicated_regs = self.compliance_engine.evaluate_compliance(
+            feature_data, 'USA', None
+        )
+        return {
+            'label': label,
+            'rationale': rationale,
+            'implicated_regs': implicated_regs,
+            'confidence_score': 0.8
+        }
+    
+    def _log_compliance_evidence(self, feature_data: Dict, compliance_result: Dict):
+        """Log compliance decision evidence using centralized logger."""
+        if log_compliance_decision:
+            evidence_data = {
+                'request_id': str(uuid.uuid4()),
+                'timestamp_iso': datetime.now().isoformat(),
+                'agent_name': 'tiktok_feature_generator',
+                'decision_flag': compliance_result['label'] == 'Compliant',
+                'reasoning_text': compliance_result['rationale'],
+                'feature_id': feature_data.get('feature_id', 'unknown'),
+                'feature_title': feature_data.get('title', 'unknown'),
+                'related_regulations': compliance_result['implicated_regs'],
+                'confidence': compliance_result.get('confidence_score', 0.0),
+                'retrieval_metadata': {
+                    'agent_specific': 'feature_generation',
+                    'compliance_validation': True
+                },
+                'timings_ms': {
+                    'generation_ms': 0  # Will be populated if timing is tracked
+                }
+            }
+            log_compliance_decision(evidence_data)
+        else:
+            # Fallback to local logging
+            evidence = {
+                'feature_id': feature_data.get('feature_id', 'unknown'),
+                'decision': compliance_result['label'],
+                'reasoning': compliance_result['rationale'],
+                'regulations': compliance_result['implicated_regs'],
+                'timestamp': datetime.now().isoformat()
+            }
+            logger.info(f"Compliance evidence logged (local): {evidence}")
 
 def main():
     """Example usage and testing."""

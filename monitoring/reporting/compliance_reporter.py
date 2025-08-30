@@ -7,6 +7,8 @@ Handles feature-level compliance data, regulatory summaries, and deadline tracki
 import json
 import pandas as pd
 import logging
+import sys
+from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, asdict
@@ -24,6 +26,16 @@ import webbrowser
 import os
 
 logger = logging.getLogger(__name__)
+
+# Add RAG adapter import
+try:
+    sys.path.append(str(Path(__file__).parent.parent.parent))
+    from src.rag_adapter import RAGAdapter
+    from src.evidence_logger import log_compliance_decision
+except ImportError:
+    RAGAdapter = None
+    log_compliance_decision = None
+    logger.warning("RAG adapter not available, using fallback reporting")
 
 class ComplianceStatus(Enum):
     COMPLIANT = "Compliant"
@@ -97,6 +109,7 @@ class ComplianceReporter:
         # Initialize components
         self.analyzer = None  # Will be set from existing compliance_analyzer
         self.dashboard_generator = DashboardGenerator(self.output_dir)
+        self.rag_adapter = RAGAdapter() if RAGAdapter else None
         self.deadline_tracker = DeadlineTracker()
         
     def _load_config(self, config_path: Optional[str]) -> Dict[str, Any]:
@@ -360,6 +373,12 @@ class ComplianceReporter:
         
         # Generate risk analysis
         risk_analysis = self._analyze_risks(features, deadlines)
+        
+        # Generate regulatory summaries using RAG if available
+        regulatory_summaries = self._get_regulatory_summaries(compliance_data.get('regulations', []))
+        
+        # Log report generation evidence
+        self._log_report_evidence(report_id, features, regulatory_summaries)
         
         # Generate recommendations
         recommendations = self._generate_recommendations(features, risk_analysis)
@@ -806,4 +825,68 @@ class DeadlineTracker:
             elif deadline.status == 'URGENT':
                 alerts.append(f"URGENT: {deadline.regulation} report due in 7 days ({deadline.next_due})")
         
-        return alerts 
+        return alerts
+    
+    def _get_rag_regulatory_context(self, regulation_name: str) -> List[Dict]:
+        """Get regulatory context using centralized RAG system."""
+        if not self.rag_adapter:
+            return []
+        
+        try:
+            return self.rag_adapter.retrieve_regulatory_context(
+                query=f"{regulation_name} requirements compliance",
+                max_results=3
+            )
+        except Exception as e:
+            logger.warning(f"RAG retrieval failed: {e}")
+            return []
+    
+    def _get_regulatory_summaries(self, regulations: List[str]) -> List[Dict]:
+        """Get regulatory summaries using RAG system."""
+        summaries = []
+        
+        for regulation in regulations:
+            context = self._get_rag_regulatory_context(regulation)
+            if context:
+                summaries.append({
+                    'regulation': regulation,
+                    'context': context,
+                    'summary': f"Retrieved {len(context)} regulatory contexts for {regulation}"
+                })
+        
+        return summaries
+    
+    def _log_report_evidence(self, report_id: str, features: List[FeatureCompliance], 
+                            regulatory_summaries: List[Dict]):
+        """Log compliance report generation evidence using centralized logger."""
+        if log_compliance_decision:
+            evidence_data = {
+                'request_id': str(uuid.uuid4()),
+                'timestamp_iso': datetime.now().isoformat(),
+                'agent_name': 'compliance_reporter',
+                'decision_flag': len(features) > 0,
+                'reasoning_text': f"Report generated for {len(features)} features and {len(regulatory_summaries)} regulations",
+                'feature_id': report_id,
+                'feature_title': f"Compliance Report {report_id}",
+                'related_regulations': [summary.get('regulation_name', 'unknown') for summary in regulatory_summaries],
+                'confidence': 1.0,  # Report generation is deterministic
+                'retrieval_metadata': {
+                    'agent_specific': 'compliance_reporting',
+                    'reporting_top_k': 3,
+                    'features_count': len(features),
+                    'regulations_count': len(regulatory_summaries)
+                },
+                'timings_ms': {
+                    'report_generation_ms': 0  # Will be populated if timing is tracked
+                }
+            }
+            log_compliance_decision(evidence_data)
+        else:
+            # Fallback to local logging
+            evidence = {
+                'report_id': report_id,
+                'features_count': len(features),
+                'regulations_count': len(regulatory_summaries),
+                'timestamp': datetime.now().isoformat()
+            }
+            logger.info(f"Compliance report evidence logged (local): {evidence}") 
