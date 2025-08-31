@@ -68,7 +68,7 @@ python -m artifact_preprocessor \
 
 ```bash
 # Analyze features for compliance
-python tiktok_feature_generator.py
+# Example: Run feature generation (removed - no longer available)
 
 # Run specific demos
 python demos/demo_active_learning.py

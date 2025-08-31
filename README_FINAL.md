@@ -208,7 +208,7 @@ print(f"Violations: {result['compliance']['violations']}")
 ```python
 response = requests.post("http://localhost:8000/mcp/analyze", json={
     "user_query": "Generate 5 social media features that would be compliant with California SB976",
-    "tools_required": ["tiktok_feature_generator"],
+    "tools_required": ["compliance_analyzer"],
     "context": {
         "jurisdiction": "US-CA",
         "regulation": "SB976",
@@ -217,7 +217,7 @@ response = requests.post("http://localhost:8000/mcp/analyze", json={
     }
 })
 
-features = response.json()['generated_features']
+features = response.json()['analysis_results']
 for feature in features:
     print(f"Feature: {feature['title']}")
     print(f"Compliance: {feature['label']}")
@@ -281,18 +281,17 @@ response = requests.post("http://localhost:8000/mcp/tools/execute", json=tool_re
 }
 ```
 
-#### 2. **TikTok Feature Generator** (`tiktok_feature_generator`)
+#### 2. **Compliance Analyzer** (`compliance_analyzer`)
 
-**Purpose**: Generates compliant social media features for specific jurisdictions
+**Purpose**: Analyzes features for regulatory compliance across jurisdictions
 
 **Parameters**:
 ```json
 {
-  "jurisdiction": "string",
+  "feature_data": "object",
   "regulation": "string",
-  "feature_domain": "string (recommendations|advertising|safety|etc.)",
-  "count": "integer",
-  "age_targeting": "string",
+  "jurisdiction": "string",
+  "analysis_type": "string (compliance|risk|recommendations|etc.)",
   "compliance_requirements": ["array"]
 }
 ```
@@ -300,13 +299,12 @@ response = requests.post("http://localhost:8000/mcp/tools/execute", json=tool_re
 **Example Usage**:
 ```python
 tool_request = {
-    "tool": "tiktok_feature_generator",
+    "tool": "compliance_analyzer",
     "parameters": {
-        "jurisdiction": "US-FL",
+        "feature_data": {"name": "age_verification", "type": "safety"},
         "regulation": "HB3",
-        "feature_domain": "safety",
-        "count": 3,
-        "age_targeting": "minors",
+        "jurisdiction": "US-FL",
+        "analysis_type": "compliance",
         "compliance_requirements": ["parental_controls", "content_filtering"]
     }
 }
@@ -451,24 +449,24 @@ print(f"Decision Trail: {len(evidence['decision_trail'])} steps")
 ### Example 2: Multi-Jurisdiction Feature Generation
 
 ```python
-# Generate features compliant across multiple jurisdictions
+# Analyze features for compliance across multiple jurisdictions
 jurisdictions = ["EU", "US-CA", "US-FL"]
-all_features = []
+all_compliance_reports = []
 
 for jurisdiction in jurisdictions:
     response = requests.post("http://localhost:8000/mcp/analyze", json={
-        "user_query": f"Generate 3 advertising features that comply with {jurisdiction} regulations for social media platforms",
-        "tools_required": ["tiktok_feature_generator"],
+        "user_query": f"Analyze advertising features for compliance with {jurisdiction} regulations for social media platforms",
+        "tools_required": ["compliance_analyzer"],
         "context": {
             "jurisdiction": jurisdiction,
             "feature_domain": "advertising",
-            "count": 3,
+            "analysis_type": "compliance",
             "target_age": "all"
         }
     })
     
-    features = response.json()['generated_features']
-    all_features.extend(features)
+    report = response.json()['analysis_results']
+    all_compliance_reports.extend(report)
 
 # Find universally compliant features
 universal_features = []
